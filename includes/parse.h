@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 19:18:32 by pablo             #+#    #+#             */
-/*   Updated: 2021/09/01 22:40:29 by pablo            ###   ########.fr       */
+/*   Updated: 2021/09/03 18:01:31 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,7 @@ typedef struct			opt_args
 
 # define SET_OPT_ARG_MARK(value) (parse.opts_args->mark = (int32_t)value)
 # define SET_OPT_ARG_PRELOAD(value) (parse.opts_args->preload = (int32_t)value)
+# define LAUNCH_PRELOAD pinger(); parse.opts_args->preload--;
 
 # define SET_OPT_ARG_PMTUDISK(opt) (parse.opts_args->pmtudisc_opts = (opt))
 # define SET_OPT_ARG_DEADLINE(value) (parse.opts_args->deadline = (int32_t)(value))

@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 19:52:07 by pablo             #+#    #+#             */
-/*   Updated: 2021/09/01 22:53:54 by pablo            ###   ########.fr       */
+/*   Updated: 2021/09/29 23:33:04 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ static bool     parse_mark_arg(const char* arg)
     return (true);
 
 error:
-    SET_ERRNO(format_ptr, arg);
+    PRINT_ERROR(format_ptr, arg);
     return (false);
 }
 
@@ -120,14 +120,14 @@ static bool     parse_preload_arg(const char* arg)
     }
     if (IS_ROOT == false && value > 3)
     {
-        SET_ERRNO(MSG_INV_ARG_PRELOAD_SU, value);
+        PRINT_ERROR(MSG_INV_ARG_PRELOAD_SU, value);
         goto error_su;
     }
     SET_OPT_ARG_PRELOAD(value);
     return (true);
 
 error:
-    SET_ERRNO(format_ptr, arg);
+    PRINT_ERROR(format_ptr, arg);
 error_su:
     return (false);
 }
@@ -160,7 +160,7 @@ static bool     parse_pmtudisc_arg(const char* arg)
     }
     if (const_parse->opts_args->pmtudisc_opts == 0)
     {
-        SET_ERRNO(MSG_INV_ARG_PREFFIX2, arg - 1, arg);
+        PRINT_ERROR(MSG_INV_ARG_PREFFIX2, arg - 1, arg);
         return (false);
     }
     return (true);
@@ -191,7 +191,7 @@ static bool     parse_deadline_arg(const char* arg)
     return (true);
 
 error:
-    SET_ERRNO(format_ptr, arg);
+    PRINT_ERROR(format_ptr, arg);
     return (false);
 }
 
@@ -216,7 +216,7 @@ static bool     parse_timeout_arg(const char* arg)
     return (true);
 
 error:
-    SET_ERRNO(format_ptr, arg);
+    PRINT_ERROR(format_ptr, arg);
     return (false);
 }
 
@@ -231,7 +231,7 @@ static bool     parse_pattern_arg(const char* arg)
         PRINT_OPT_ARG_PATTERN(is_neg);
         return (true);
     }
-    SET_ERRNO(MSG_INV_ARG_BAD_PATTERN, arg);
+    PRINT_ERROR(MSG_INV_ARG_BAD_PATTERN, arg);
     return (false);
 }
 
@@ -256,7 +256,7 @@ static bool     parse_tos_arg(const char* arg)
     return (true);
 
 error:
-    SET_ERRNO(format_ptr, arg);
+    PRINT_ERROR(format_ptr, arg);
     return (false);
 }
 
@@ -286,7 +286,7 @@ static bool     parse_sndbuff_arg(const char* arg)
     return (true);
 
 error:
-    SET_ERRNO(format_ptr, arg);
+    PRINT_ERROR(format_ptr, arg);
     return (false);
 }
 
@@ -316,7 +316,7 @@ static bool     parse_ttl_arg(const char* arg)
     return (true);
 
 error:
-    SET_ERRNO(format_ptr, arg);
+    PRINT_ERROR(format_ptr, arg);
     return (false);
 }
 
@@ -340,7 +340,7 @@ static bool     parse_timestamp_arg(const char* arg)
     }
     if (const_parse->opts_args->timestamp == 0)
     {
-        SET_ERRNO(MSG_INV_ARG_BAD_TIMESTAMP, arg);
+        PRINT_ERROR(MSG_INV_ARG_BAD_TIMESTAMP, arg);
         return (false);
     }
     return (true);
@@ -350,7 +350,7 @@ static bool    opt_arg_is_present(register size_t* const av_idx, const char** av
 {
     if ((*av)[++(*av_idx)] == NULL)
     {
-        SET_ERRNO(USAGE_NO_ARG, ++(*av)[*av_idx - 1]);
+        PRINT_ERROR(USAGE_NO_ARG, ++(*av)[*av_idx - 1]);
         return (false);
     }
     return (true);
@@ -373,7 +373,7 @@ error_code_t    parse_opts(const char** av[])
         "-n"
     };
 
-    static const fill_opt_args_t const fillers[] = {
+    static const fill_opt_args_t fillers[] = {
         &parse_mark_arg,
         &parse_preload_arg,
         &parse_interface_arg,
@@ -407,8 +407,7 @@ error_code_t    parse_opts(const char** av[])
         }
         if (found == false)
         {
-            printf("Goes here\n");
-            SET_ERRNO(USAGE_INV_OPT, ++(*av)[av_idx]);
+            PRINT_ERROR(USAGE_INV_OPT, ++(*av)[av_idx]);
             goto invalid_opt;
         }
     }

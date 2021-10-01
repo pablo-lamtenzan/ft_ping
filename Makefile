@@ -7,10 +7,12 @@ SRCDIR = srcs
 
 PARSE= $(addprefix parse/, parse_opts.c)
 MAIN= $(addprefix main/, main.c)
+LEGACY= $(addprefix legacy/, in_cksum.c in_tvsub.c)
+CORE= get_hostaddr.c pinger.c resolve_dest_addr.c sig_handlers.c print_packet.c
+DEBUG= debug.c 
 ERROR_HANDLING= #error.c
-DEBUG= debug.c
 
-SRCS= $(MAIN) $(ERROR_HANDLING) $(PARSE) $(DEBUG)
+SRCS= $(MAIN) $(ERROR_HANDLING) $(PARSE) $(LEGACY) $(CORE) $(DEBUG)
 			
 OBJDIR=bin
 OBJS= $(addprefix $(OBJDIR)/, $(SRCS:.c=.o))

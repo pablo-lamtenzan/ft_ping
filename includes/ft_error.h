@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 19:55:21 by pablo             #+#    #+#             */
-/*   Updated: 2021/09/01 23:14:16 by pablo            ###   ########.fr       */
+/*   Updated: 2021/10/01 18:54:25 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,10 @@ typedef enum	error_code
 	SUCCESS,
     ERR_DEST_REQ,
     ERR_INV_OPT,
+    ERR_SYSCALL,
 }				error_code_t;
 
-# define SET_ERRNO(format, args...) dprintf(2, format, args)
+# define PRINT_ERROR(format, args...) dprintf(2, format, args)
 
 # define USAGE_ERR __progname ": option requires an argument -- \'%s\'"
 # define USAGE_BRIEF __progname " [options] <destination>"
@@ -68,6 +69,7 @@ IPv6 options:\n\
 # define _MSG_INV_ARG_RANGE_INT2 _MSG_INV_ARG_PREFIX ": out of range: 1 <= value <= 2147483647" "\n"
 # define _MSG_INV_ARG_RANGE_UCHAR _MSG_INV_ARG_PREFIX ": out of range: 0 <= value <= 255" "\n"
 # define _MSG_INV_ARG_BAD_TIMESTAMP __progname ": invalid timestamp type: %s" "\n"
+# define _INVALID_SYSCALL __progname ": syscall %s failed for some unknown reason\n"
 
 static const char* const msg[] = {
     _USAGE_NO_ARG,
@@ -86,7 +88,8 @@ static const char* const msg[] = {
     _MSG_INV_ARG_RANGE_INT2,
     _MSG_INV_ARG_RANGE_UCHAR,
     _MSG_INV_ARG_BAD_TIMESTAMP,
-    _USAGE_INV_OPT
+    _USAGE_INV_OPT,
+    _INVALID_SYSCALL
 };
 
 # define USAGE_NO_ARG msg[0]
@@ -106,5 +109,6 @@ static const char* const msg[] = {
 # define MSG_INV_ARG_RANGE_UCHAR msg[14]
 # define MSG_INV_ARG_BAD_TIMESTAMP msg[15]
 # define USAGE_INV_OPT msg[16]
+# define INVALID_SYSCALL msg[17]
 
 //void     throw_error(error_code_t code);
