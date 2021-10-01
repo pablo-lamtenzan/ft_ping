@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 21:22:21 by pablo             #+#    #+#             */
-/*   Updated: 2021/10/01 23:31:39 by pablo            ###   ########.fr       */
+/*   Updated: 2021/10/01 23:32:24 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,7 @@ int main(int ac, const char* av[])
 			.msg_namelen = sizeof(gctx.dest_info->ai_addr),
 			.msg_iov = (struct iovec[]){{
                 .iov_base = packet,
-			.iov_len = ARR_SIZE(packet)
+			    .iov_len = ARR_SIZE(packet)
             }},
 			.msg_iovlen = 1,
 			.msg_control = NULL, // todo can put a buff[512 bytes] here to have more info
