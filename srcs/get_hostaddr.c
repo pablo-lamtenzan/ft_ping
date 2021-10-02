@@ -13,7 +13,14 @@
 # include <ping.h>
 # include <parse.h>
 # include <limits.h> // for HOST_NAME_MAX isn't useful on my computer
+#ifdef __linux__
 # include <bits/local_lim.h> // for HOST_NAME_MAX solves the problem
+#elif __APPLE__
+# ifndef HOST_NAME_MAX
+#  define HOST_NAME_MAX 255
+# endif
+#endif
+
 # include <netdb.h>
 
 # define IS_IPV6(opts)	( \
@@ -26,7 +33,7 @@ const char* const get_hostaddr(
 #endif
 	)
 {
-	static uint8_t buff[HOST_NAME_MAX];
+	static char buff[HOST_NAME_MAX];
 
 	struct sockaddr_in* sin;
 

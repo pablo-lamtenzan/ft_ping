@@ -365,7 +365,7 @@ static bool    opt_arg_is_present(register size_t* const av_idx, const char** av
 */
 error_code_t    parse_opts(const char** av[])
 {
-    static const uint8_t* const opts[] = {
+    static const char* const opts[] = {
         "-m", "-l", "-I", "-M",
         "-w", "-W", "-p", "-Q",
         "-S", "-t", "-T", "-4",

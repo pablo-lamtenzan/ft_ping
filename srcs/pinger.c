@@ -19,9 +19,9 @@
 
 void pinger()
 {
-	packet_t packet_to_send = {
-		0,
-		.p_icp = (struct icmp){
+#ifndef __linux__
+	packet_t packet_to_send = (packet_t){
+			.p_icp = (struct icmp){
 			.icmp_type = ICMP_ECHO,
 			.icmp_code = 0,
 			.icmp_cksum = 0,
@@ -29,6 +29,12 @@ void pinger()
 			.icmp_id = gctx.pid
 		}
 	};
+#elif __APPLE__ // to remove
+	packet_t packet_to_send = {0};
+	packet_to_send.p_icp.icmp_type = ICMP_ECHO;
+	packet_to_send.p_icp.icmp_seq = gctx.nb_packets_transmited++;
+	packet_to_send.p_icp.icmp_id = gctx.pid;
+#endif
 
 	// If timming, to do, how to i use this in real ping
 	if (gctx.is_timed)
@@ -52,7 +58,7 @@ void pinger()
 	}
 	else if (bytes_sent != msg_size)
 	{
-		printf("ping: wrote %s %d chars, ret=%d\n",
+		printf("ping: wrote %s %ld chars, ret=%ld\n",
 			"hostname TO DO", msg_size, bytes_sent);
 	}
 }

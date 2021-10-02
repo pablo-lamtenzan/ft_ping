@@ -81,7 +81,7 @@ typedef struct          gcontext
 
 extern gcontext_t		gctx;
 
-# define PRINT_HEADER(hostaddr) (printf("PING %s (%s): %d data bytes\n", \
+# define PRINT_HEADER(hostaddr) (printf("PING %s (%s): %ld data bytes\n", \
 	gctx.dest_info->ai_canonname ? gctx.dest_info->ai_canonname : hostaddr, \
 	hostaddr, gctx.msg_datalen))
 

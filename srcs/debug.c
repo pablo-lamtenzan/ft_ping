@@ -21,7 +21,7 @@
 void print_opts()
 {
     dprintf(2, "[DEBUG] Options:\n");
-    static const uint8_t* const opts[] = {
+    static const char* const opts[] = {
         "-m", "-l", "-I", "-M",
         "-w", "-W", "-p", "-Q",
         "-S", "-t", "-T", "-4",

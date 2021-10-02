@@ -11,13 +11,14 @@
 /* ************************************************************************** */
 
 # include <ping.h>
-# include <netinet/ip_icmp.h>
+# include <netinet/in.h>
 # include <netinet/ip.h>
+# include <netinet/ip_icmp.h>
 # include <stdio.h>
 # include <sys/time.h>
 
 # define PRINT_STATS(bytes, from, from_ip, seq, ttl, time) \
-        printf("%d bytes form %s (%s): icmp_seq=%d ttl=%d time=%f ms\n",\
+        printf("%d bytes from %s (%s): icmp_seq=%d ttl=%d time=%ld ms\n",\
         bytes, from, from_ip, seq, ttl,time)
 
 # define TV_TO_MS(tv) (tv.tv_sec * 1000 + (tv.tv_usec / 1000))
@@ -69,11 +70,13 @@ void    print_packet(const void* const packet, ssize_t packet_len, uint8_t famil
 #endif
             INET_ADDRSTRLEN];
 
+    inet_ntop(family, from, buff, sizeof(buff)); // TO DO: Problem with buff
+
 #ifdef __linux__
-        inet_ntop(family, from, buff, sizeof(buff)); // TO DO: Problem with buff
+        
         PRINT_STATS(ip->ip_len, buff, from, icmp->icmp_seq, ip->ip_ttl, t);
 #elif __APPLE__
-        //PRINT_STATS("todo", );
+        PRINT_STATS(ip->ip_len, buff, from, icmp->icmp_seq, ip->ip_ttl, t);
 #endif
     }
 

@@ -41,20 +41,20 @@ void terminate()
     // NOTE: Statistics changes between OS
     
     printf("\n----%s PING Statistics----\n"
-    "%d packets transmitted, %d packets received",
+    "%ld packets transmitted, %ld packets received",
     gctx.dest_info->ai_canonname,
-    gctx.nb_packets_transmited, gctx.nb_packets_received);
+    (long)gctx.nb_packets_transmited, (long)gctx.nb_packets_received);
     if (gctx.nb_packets_transmited)
     {
         if (gctx.nb_packets_transmited > gctx.nb_packets_received)
-            printf(", %ld%% packet loss\n", (int64_t)PERCENTAGE(gctx.nb_packets_received, gctx.nb_packets_transmited));
+            printf(", %ld%% packet loss\n", (long)PERCENTAGE(gctx.nb_packets_received, gctx.nb_packets_transmited));
         else
             printf(" -- somebody's printing up packets!\n");
     }
     // if timing
     if (gctx.nb_packets_received)
         printf("rrt min/avg/max = %ld/%ld/%ld\n", \
-        gctx.tmin, gctx.tsum / gctx.nb_packets_received, gctx.tmax);
+        (long)gctx.tmin, (long)(gctx.tsum / gctx.nb_packets_received), (long)gctx.tmax);
 
     close(gctx.sockfd);
     exit(gctx.nb_packets_received == 0);
