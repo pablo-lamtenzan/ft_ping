@@ -102,6 +102,14 @@ static bool     parse_preload_arg(const char* arg)
 {
     const char* format_ptr;
 
+#ifdef __APPLE__
+    if (IS_ROOT == false)
+    {
+        PRINT_ERROR("%s\n", "ping: -l flag: Operation not permitted");
+        return (false);
+    }
+#endif
+
     if (is_string_digit(arg) == false)
     {
         format_ptr = MSG_INV_ARG_STR;

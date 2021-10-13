@@ -42,7 +42,7 @@
 
 # define MAX_PACKET_SIZE 4096
 
-# define PERCENTAGE(x, max) ((((max) - (x)) * 100) / (max))
+# define PERCENTAGE(x, max) ((((double)(max) - (double)(x)) * 100.0) / (double)(max))
 
 # define PSEUDO_INFINITY 999999999
 
@@ -55,6 +55,8 @@ typedef struct          gcontext
     int                 sockfd;
     pid_t               pid;
     struct timezone     tz;
+    struct timeval      tsend_date;
+    const char*         hostaddr;
 
     struct
     {
@@ -69,14 +71,16 @@ typedef struct          gcontext
     struct
     {
         bool            t_is_timed;
-        int64_t         t_tmax;
-        int64_t         t_tmin;
-        int64_t         t_tsum;
+        double          t_tmax;
+        double          t_tmin;
+        double          t_tsum;
+        double          stddevsum;
     } context_timing;
     # define is_timed context_timing.t_is_timed
 	# define tmax context_timing.t_tmax
 	# define tmin context_timing.t_tmin
 	# define tsum context_timing.t_tsum
+    # define stddevsum context_timing.stddevsum
 }                       gcontext_t;
 
 extern gcontext_t		gctx;
@@ -93,11 +97,12 @@ const char* const get_hostaddr(
 #endif
 );
 
-void    print_packet(const void* const packet, ssize_t packet_len, uint8_t family, const char* const from);
+void    print_packet(const void* const packet, ssize_t packet_len, uint8_t family);
 
 /// Sig handlers
 void			pinger_loop();
 void			terminate();
+void            info();
 
 void			pinger();
 

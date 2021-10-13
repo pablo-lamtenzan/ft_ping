@@ -39,7 +39,7 @@ typedef struct  packet
 #elif __APPLE__
     union
     {
-        uint8_t _raw[MAX_PACKET_SIZE];
+        uint16_t _raw[MAX_PACKET_SIZE / 2];
         struct
         {
             struct icmp     icp;

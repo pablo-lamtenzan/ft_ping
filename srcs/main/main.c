@@ -76,13 +76,13 @@ int main(int ac, const char* av[])
 #ifdef IS_IPV6_SUPORTED
 	bool is_ipv6;
 #endif
-	const char* const hostaddr = get_hostaddr(
+	gctx.hostaddr = get_hostaddr(
 #ifdef IS_IPV6_SUPORTED
 		&is_ipv6
 #endif
 	);
 
-	if (hostaddr == NULL)
+	if (gctx.hostaddr == NULL)
 	{
 		st = ERR_SYSCALL;
 		PRINT_ERROR(INVALID_SYSCALL, "inet_ntop");
@@ -121,13 +121,16 @@ int main(int ac, const char* av[])
         goto end;
 	}
 */
-    PRINT_HEADER(hostaddr);
+    PRINT_HEADER(gctx.hostaddr);
 
     signal(SIGALRM, pinger_loop);
     signal(SIGINT, terminate);
+    signal(SIGINFO, info);
 
-    while (const_parse->opts_args->preload)
+    while (const_parse->opts_args->preload > 0)
+    {
         LAUNCH_PRELOAD;
+    }
 
     pinger_loop();
 
@@ -163,7 +166,7 @@ int main(int ac, const char* av[])
 #ifdef IS_IPV6_SUPORTED
         is_ipv6 ? AF_INET6 :
 #endif
-        AF_INET, hostaddr);
+        AF_INET);
         if (gctx.nb_packets && gctx.nb_packets_received - gctx.nb_packets == 0)
             terminate();
     }

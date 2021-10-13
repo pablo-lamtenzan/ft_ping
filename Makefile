@@ -1,7 +1,7 @@
 # TO DO: Of course i need a better makefile to precced with this project
 
 NAME=ft_ping
-CFLAGS= -Wall -Wextra -Werror #-g3 -fsanitize=address
+CFLAGS= -Wall -Wextra -Werror -lm #-g3 -fsanitize=address
 
 SRCDIR = srcs
 
