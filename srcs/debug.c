@@ -24,9 +24,9 @@ void print_opts()
     static const char* const opts[] = {
         "-m", "-l", "-I", "-M",
         "-w", "-W", "-p", "-Q",
-        "-S", "-t", "-T", "-4",
-        "-6", "-v", "-h", "-f",
-        "-n"
+        "-S", "-t", "-T", "-c",
+        "-4", "-6", "-v", "-h",
+        "-f", "-n"
     };
     for (size_t i = 0 ; i < ARR_SIZE(opts) ; i++)
     {
@@ -37,11 +37,11 @@ void print_opts()
     dprintf(2, "[DEBUG] Options values:\n\t-mark: %d\n\t-preload: %d\n"
     "\t-pmtudisc: %d\n\t-deadline: %d\n\t-timeout: %d\n\t-pattern: [%s]"
     "\n\t-tos: %d\n\t-sndbuff: %d\n\t-ttl: %d\n\t-timestamp: %d\n\n",
-    const_parse->opts_args->mark, const_parse->opts_args->preload,
-    const_parse->opts_args->pmtudisc_opts, const_parse->opts_args->deadline,
-    const_parse->opts_args->timeout, USE_OPT_ARG_PATTERN,
-    const_parse->opts_args->tos, const_parse->opts_args->sndbuff,
-    const_parse->opts_args->ttl, const_parse->opts_args->timestamp);
+    gctx.const_parse->opts_args.mark, gctx.const_parse->opts_args.preload,
+    gctx.const_parse->opts_args.pmtudisc_opts, gctx.const_parse->opts_args.deadline,
+    gctx.const_parse->opts_args.timeout, USE_OPT_ARG_PATTERN,
+    gctx.const_parse->opts_args.tos, gctx.const_parse->opts_args.sndbuff,
+    gctx.const_parse->opts_args.ttl, gctx.const_parse->opts_args.timestamp);
 }
 
 # endif

@@ -23,6 +23,8 @@
 # include <netdb.h>
 # include <netinet/in.h>
 
+// TODO: FQDN
+// TODO: 1 global var
 
 // Original ping (first implementation): https://gist.github.com/kbaribeau/4495181
 
@@ -32,19 +34,16 @@
 
 # define PRINT_HELP (printf("%s", USAGE_HELP))
 
-opts_args_t opts_args = {0};
-parse_t     parse = {
-	.opts = 0,
-	.opts_args = &opts_args
-};
-const parse_t* const const_parse = (const parse_t* const)&parse;
-
 gcontext_t  gctx = {
-    0,
+    .parse = {
+        .opts = 0,
+        .opts_args = {0}
+    },
+    .const_parse = (const parse_t* const)&gctx.parse,
     .tmin = PSEUDO_INFINITY,
 	.msg_datalen = 64 - 8, // why this size is used ?
-    .nb_packets = 42 // must be infinity by default ?
 };
+
 
 int main(int ac, const char* av[])
 {
@@ -60,11 +59,13 @@ int main(int ac, const char* av[])
     if ((st = parse_opts(&av)) != SUCCESS)
         goto end;
 
+    gctx.nb_packets = gctx.parse.opts_args.count;
+
 # ifdef DEBUG
     print_opts();
 # endif
 
-    if (OPT_HAS(OPT_HELP))
+    if (OPT_HAS(OPT_HELP) || !*av)
     {
         PRINT_HELP;
         st = ERR_INV_OPT;
@@ -127,7 +128,7 @@ int main(int ac, const char* av[])
     signal(SIGINT, terminate);
     signal(SIGINFO, info);
 
-    while (const_parse->opts_args->preload > 0)
+    while (gctx.const_parse->opts_args.preload > 0)
     {
         LAUNCH_PRELOAD;
     }

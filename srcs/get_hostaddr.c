@@ -39,7 +39,7 @@ const char* const get_hostaddr(
 
 #ifdef IS_IPV6_SUPORTED
 	*is_ipv6 = gctx.dest_info->ai_addr->sa_family == AF_INET6
-	&& IS_IPV6(const_parse->opts);
+	&& IS_IPV6(gctx.const_parse->opts);
 
 	struct sockaddr_in6* sin6;
 

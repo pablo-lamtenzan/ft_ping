@@ -36,7 +36,7 @@ error_code_t resolve_dest_addr(const char* av[])
 #elif __APPLE__
 	struct addrinfo hints = {0};
 	hints.ai_flags = AI_CANONNAME;
-	hints.ai_family = AF_UNSPEC;
+	hints.ai_family = AF_UNSPEC; // afinet
 #endif
 
 	return (getaddrinfo(*av, (void*)0, &hints, &gctx.dest_info) == 0

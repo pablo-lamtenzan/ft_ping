@@ -18,8 +18,6 @@
 # include <stdlib.h>
 # include <netdb.h>
 
-# include <math.h>
-
 //__attribute__ ((interrupt))
 void pinger_loop()
 {
@@ -38,7 +36,7 @@ void pinger_loop()
 
 __attribute__ ((always_inline))
 static inline double calc_standard_deviation(double dividendsum, double amount)
-{ return sqrt(dividendsum / amount); }
+{ return (dividendsum / amount); }
 
 //__attribute__ ((interrupt))
 void terminate()
@@ -82,7 +80,9 @@ void info()
     // print: load: 1.50  cmd: ping 8559 running 0.00u 0.00s
         // 15/15 packets received (100.0%) 11.487 min / 11.592 avg / 11.681 max
 
-    // ON STDERROR
+    dprintf(STDERR_FILENO, "cmd: " __progname " %d running %.2fu %.2fs\n%lld/%lld packets received (%.1f%%)"
+    "%.3f min / %.3f avg / %.3f max\n", gctx.pid, 0.0, 0.0, gctx.nb_packets_received, gctx.nb_packets_transmited,
+    (double)PERCENTAGE(gctx.nb_packets_received, gctx.nb_packets_transmited), gctx.tmin,
+    (double)(gctx.tsum / gctx.nb_packets_received), gctx.tmax);
 
-    // TRIGERED BY SIGINFO
 }

@@ -44,7 +44,8 @@ typedef enum	error_code
 IPv4 options:\n\
 \t-4                 use IPv4\n\n\
 IPv6 options:\n\
-\t-6                 use IPv6\n"
+\t-6                 use IPv6\n\
+\t-c                 stop after count ECHO_RESPONSE. If count is 0 send packets until interrupt\n"
 
 # define USAGE_HELP USAGE_BRIEF "\n\n" USAGE_OPTIONS
 
@@ -70,6 +71,7 @@ IPv6 options:\n\
 # define _MSG_INV_ARG_RANGE_UCHAR _MSG_INV_ARG_PREFIX ": out of range: 0 <= value <= 255" "\n"
 # define _MSG_INV_ARG_BAD_TIMESTAMP __progname ": invalid timestamp type: %s" "\n"
 # define _INVALID_SYSCALL __progname ": syscall %s failed for some unknown reason\n"
+# define _MSG_INV_ARG_COUNT __progname ": invalid count of packets to transmit: `%s\'" "\n"
 
 static const char* const msg[] = {
     _USAGE_NO_ARG,
@@ -89,7 +91,8 @@ static const char* const msg[] = {
     _MSG_INV_ARG_RANGE_UCHAR,
     _MSG_INV_ARG_BAD_TIMESTAMP,
     _USAGE_INV_OPT,
-    _INVALID_SYSCALL
+    _INVALID_SYSCALL,
+    _MSG_INV_ARG_COUNT
 };
 
 # define USAGE_NO_ARG msg[0]
@@ -110,5 +113,6 @@ static const char* const msg[] = {
 # define MSG_INV_ARG_BAD_TIMESTAMP msg[15]
 # define USAGE_INV_OPT msg[16]
 # define INVALID_SYSCALL msg[17]
+# define MSG_INV_ARG_COUNT msg[18]
 
 //void     throw_error(error_code_t code);

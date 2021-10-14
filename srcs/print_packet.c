@@ -17,8 +17,6 @@
 # include <stdio.h>
 # include <sys/time.h>
 
-# include <math.h>
-
 #ifdef __linux__
 # define PRINT_STATS(bytes, from, from_ip, seq, ttl, time) \
         printf("%d bytes from %s (%s): icmp_seq=%d ttl=%d time=%ld ms\n",\
@@ -34,7 +32,7 @@
 
 __attribute__ ((always_inline))
 static inline void calc_dividendsum(double* const total, double x, double mean)
-{ *total += pow(x - mean, 2); }
+{ *total += (x - mean); }
 
 
 void    print_packet(const void* const packet, ssize_t packet_len, uint8_t family)

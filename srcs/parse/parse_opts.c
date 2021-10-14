@@ -166,7 +166,7 @@ static bool     parse_pmtudisc_arg(const char* arg)
             break ;
         }
     }
-    if (const_parse->opts_args->pmtudisc_opts == 0)
+    if (gctx.const_parse->opts_args.pmtudisc_opts == 0)
     {
         PRINT_ERROR(MSG_INV_ARG_PREFFIX2, arg - 1, arg);
         return (false);
@@ -346,12 +346,28 @@ static bool     parse_timestamp_arg(const char* arg)
             break ;
         }
     }
-    if (const_parse->opts_args->timestamp == 0)
+    if (gctx.const_parse->opts_args.timestamp == 0)
     {
         PRINT_ERROR(MSG_INV_ARG_BAD_TIMESTAMP, arg);
         return (false);
     }
     return (true);
+}
+
+static bool     parse_count_arg(const char* arg)
+{
+    if (is_string_digit(arg) == false || strlen(arg) > MAX_64BITS_CHARS - 1)
+        goto error;
+    int64_t value = atol(arg);
+    if (value > INT32_MAX || value < 0)
+        goto error;
+
+    SET_OPT_ARG_COUNT(value);
+    return true;
+
+error:
+    PRINT_ERROR(MSG_INV_ARG_COUNT, arg);
+    return false;
 }
 
 static bool    opt_arg_is_present(register size_t* const av_idx, const char** av[])
@@ -376,9 +392,9 @@ error_code_t    parse_opts(const char** av[])
     static const char* const opts[] = {
         "-m", "-l", "-I", "-M",
         "-w", "-W", "-p", "-Q",
-        "-S", "-t", "-T", "-4",
-        "-6", "-v", "-h", "-f",
-        "-n"
+        "-S", "-t", "-T", "-c",
+        "-4", "-6", "-v", "-h",
+        "-f", "-n"
     };
 
     static const fill_opt_args_t fillers[] = {
@@ -393,6 +409,7 @@ error_code_t    parse_opts(const char** av[])
         &parse_sndbuff_arg,
         &parse_ttl_arg,
         &parse_timestamp_arg,
+        &parse_count_arg,
     };
 
     size_t av_idx = 0;
