@@ -10,7 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include <parse.h>
 # include <stdlib.h>
 # include <ping.h>
 # include <stdio.h>
@@ -22,9 +21,6 @@
 # include <sys/socket.h>
 # include <netdb.h>
 # include <netinet/in.h>
-
-// TODO: FQDN
-// TODO: 1 global var
 
 // Original ping (first implementation): https://gist.github.com/kbaribeau/4495181
 
@@ -71,6 +67,8 @@ int main(int ac, const char* av[])
         st = ERR_INV_OPT;
         goto end;
     }
+
+    ///NOTE: resolve_dest_addr & get_hostaddr can be joined on a single function
 
     if ((st = resolve_dest_addr(av) != SUCCESS))
         goto end;

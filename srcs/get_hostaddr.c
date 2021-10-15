@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 # include <ping.h>
-# include <parse.h>
 # include <limits.h> // for HOST_NAME_MAX isn't useful on my computer
 #ifdef __linux__
 # include <bits/local_lim.h> // for HOST_NAME_MAX solves the problem

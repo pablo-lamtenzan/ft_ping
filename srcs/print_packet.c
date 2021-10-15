@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   print_packet.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
+/*   By: plamtenz <plamtenz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/01 20:12:01 by pablo             #+#    #+#             */
-/*   Updated: 2021/10/01 22:21:04 by pablo            ###   ########.fr       */
+/*   Updated: 2021/10/15 22:24:56 by plamtenz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ static inline void calc_dividendsum(double* const total, double x, double mean)
 
 void    print_packet(const void* const packet, ssize_t packet_len, uint8_t family)
 {
-    const struct ip* const ip = (const struct ip* const)packet;
+    const struct iphdr* const ip = (const struct ip* const)packet;
 
     const ssize_t header_len = ip->ip_hl << 2;
 
@@ -66,9 +66,9 @@ void    print_packet(const void* const packet, ssize_t packet_len, uint8_t famil
 
         // TO DO: if timing
         struct timeval tv;
-        ///struct timeval* tp = (struct timeval*)icmp->icmp_data;
+        //struct timeval* tp = (struct timeval*)icmp->icmp_data;
         gettimeofday(&tv, &gctx.tz);
-        tvsub(&tv, &gctx.tsend_date);
+        tvsub(&tv, &gctx.tsend_date );
         const double t = TV_TO_MS(tv);
         gctx.tsum += t;
         if (t < gctx.tmin)
@@ -88,9 +88,12 @@ void    print_packet(const void* const packet, ssize_t packet_len, uint8_t famil
 
 #ifdef __linux__
         
-        PRINT_STATS(ip->ip_len, buff, gctx.hostaddr, icmp->icmp_seq, ip->ip_ttl, t);
+        PRINT_STATS(int)packet_len, buff, gctx.hostaddr, icmp->icmp_seq, ip->ip_ttl, t);
 #elif __APPLE__
-        PRINT_STATS(ip->ip_len, buff, gctx.hostaddr, icmp->icmp_seq, ip->ip_ttl, t);
+
+        printf("[DEBUG] packet_len: %ld, ip header len: %ld ip->ip_hl: %d\n", packet_len, header_len, ip->ip_hl);
+
+        PRINT_STATS((int)packet_len, buff, gctx.hostaddr, icmp->icmp_seq, ip->ip_ttl, t);
 #endif
     }
 

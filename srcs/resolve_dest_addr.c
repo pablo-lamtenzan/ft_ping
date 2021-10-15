@@ -10,7 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include <parse.h>
 # include <ping.h>
 
 # include <sys/types.h>
@@ -36,7 +35,7 @@ error_code_t resolve_dest_addr(const char* av[])
 #elif __APPLE__
 	struct addrinfo hints = {0};
 	hints.ai_flags = AI_CANONNAME;
-	hints.ai_family = AF_UNSPEC; // afinet
+	hints.ai_family = AF_INET; // should work on ipv4/ipv6
 #endif
 
 	return (getaddrinfo(*av, (void*)0, &hints, &gctx.dest_info) == 0

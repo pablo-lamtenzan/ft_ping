@@ -6,7 +6,7 @@
 /*   By: plamtenz <plamtenz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 19:55:21 by pablo             #+#    #+#             */
-/*   Updated: 2021/10/15 19:49:34 by plamtenz         ###   ########.fr       */
+/*   Updated: 2021/10/15 20:50:46 by plamtenz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@ typedef enum	error_code
     ERR_DEST_REQ,
     ERR_INV_OPT,
     ERR_SYSCALL,
+    ERR_INV_FAM,
+    ERR_PRIV,
 }				error_code_t;
 
 # define PRINT_ERROR(format, args...) dprintf(2, format, args)
@@ -72,3 +74,5 @@ IPv6 options:\n\
 # define MSG_INV_ARG_BAD_TIMESTAMP __progname ": invalid timestamp type: %s" "\n"
 # define INVALID_SYSCALL __progname ": syscall %s failed for some unknown reason\n"
 # define MSG_INV_ARG_COUNT __progname ": invalid count of packets to transmit: `%s\'" "\n"
+# define MSG_INVALID_FAMILY __progname ": error: invalid family ( hint: %s )" "\n"
+# define MSG_MUST_BE_ROOT __progname ": error: user msut be root" "\n"

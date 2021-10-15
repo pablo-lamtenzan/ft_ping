@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   packet.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
+/*   By: plamtenz <plamtenz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/05 16:37:48 by pablo             #+#    #+#             */
-/*   Updated: 2021/10/01 22:50:57 by pablo            ###   ########.fr       */
+/*   Updated: 2021/10/15 20:44:06 by plamtenz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ typedef struct  packet
 #elif __APPLE__
     union
     {
-        uint16_t _raw[MAX_PACKET_SIZE / 2];
+        uint16_t _raw[MAX_PACKET_SIZE / sizeof(uint16_t)];
         struct
         {
             struct icmp     icp;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ping.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
+/*   By: plamtenz <plamtenz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 20:12:13 by pablo             #+#    #+#             */
-/*   Updated: 2021/10/01 22:42:36 by pablo            ###   ########.fr       */
+/*   Updated: 2021/10/15 19:47:05 by plamtenz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -229,6 +229,3 @@ void			pinger();
 /// Legacy utils
 void tvsub(struct timeval* out, struct timeval* in);
 unsigned short in_cksum(unsigned short *addr, int len);
-
-
-
