@@ -7,6 +7,10 @@
 # include <netdb.h>
 # include <netinet/in.h>
 
+# define PRINT_HEADER(hostaddr) (printf("PING %s (%s): %ld(%ld) bytes of data\n", \
+	gctx.dest_info->ai_canonname ? gctx.dest_info->ai_canonname : hostaddr, \
+	hostaddr, gctx.packet_datalen, gctx.packet_datalen + sizeof(struct iphdr)))
+
 gcontext_t  gctx = (gcontext_t){
     .const_parse = (const parse_t* const)&gctx.parse,
     .tmin = PSEUDOINFINTY,
@@ -17,8 +21,8 @@ gcontext_t  gctx = (gcontext_t){
 __attribute__ ((always_inline))
 static inline void spetialize_by_ipv4()
 {
-    gctx.send_ping = &send_ping;
-    gctx.print_packet = &print_packet;
+    gctx.send_ping = &send_ping4;
+    gctx.print_packet = &print_packet4;
 }
 
 #ifdef IS_IPV6_SUPORTED
@@ -96,7 +100,7 @@ int main(int ac, const char* av[])
 #ifdef IS_IPV6_SUPORTED
         is_ipv6 ? AF_INET6 :
 #endif
-    AF_INET, SOCK_RAW, IPPROTO_ICMP) < 0)
+    AF_INET, SOCK_RAW, IPPROTO_ICMP) < 0))
     {
         st = ERR_SYSCALL;
         PRINT_ERROR(INVALID_SYSCALL, "socket");
@@ -111,8 +115,7 @@ int main(int ac, const char* av[])
 	}
 
     if (signal(SIGALRM, pinger_loop) == SIG_ERR
-    || signal(SIGINT, terminate) == SIG_ERR
-    || signal(SIGINFO, info) == SIG_ERR)
+    || signal(SIGINT, terminate) == SIG_ERR)
     {
         st = ERR_SYSCALL;
         PRINT_ERROR(INVALID_SYSCALL, "signal");
@@ -125,7 +128,9 @@ int main(int ac, const char* av[])
     spatialize_by_ipv4();
 #endif
 
-    gctx.pid = getpid() & 0xffff;
+    gctx.prog_id = getpid() & 0XFFFF;
+
+    PRINT_HEADER(gctx.dest_dns);
 
     while (gctx.const_parse->opts_args.preload > 0)
     {
@@ -141,12 +146,9 @@ int main(int ac, const char* av[])
 
     for ( ; ; )
     {
-
-        /// TODO: INIT function pointers to send/print packets
-        if ((st = receive_pong(packet, ARR_SIZE(packet), &bytes_recv)) != SUCCESS)
+        if ((st = receive_pong(packet, ARR_SIZE(packet), &bytes_recv)) != SUCCESS
+        || ((st = gctx.print_packet(packet, bytes_recv)) != SUCCESS))
             goto end;
-        gctx.print_packet(packet, bytes_recv);
-
         if (gctx.nb_packets && gctx.nb_packets_received - gctx.nb_packets == 0)
             terminate();
     }

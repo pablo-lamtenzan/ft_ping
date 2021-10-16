@@ -42,3 +42,10 @@ typedef struct			parse
 	uint32_t			opts;
 	opts_args_t         opts_args;
 }						parse_t;
+
+/// Add an option (opt_t) to the parse context
+# define OPT_ADD(opt) (gctx.parse.opts |= (opt))
+/// Delete an option (opt_t) from the parse context
+# define OPT_DEL(opt) (gctx.parse.opts &= ~(opt))
+/// Expands to non zero if the option (opt_t) is in the parse context
+# define OPT_HAS(opt) (gctx->const_parse.opts & (opt))

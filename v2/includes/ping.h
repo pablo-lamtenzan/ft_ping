@@ -7,6 +7,7 @@
 # include <sys/time.h>
 # include <sys/types.h>
 # include <stdbool.h>
+# include <arpa/inet.h>
 
 
 #ifdef AF_INET6
@@ -22,7 +23,7 @@ typedef struct 		gcontext
 	const char*			dest_dns;
     size_t              packet_datalen;
 	int					sock_fd;
-	pid_t				progpid;
+	pid_t				prog_id;
 	struct timezone		tz;
 	struct timeval		packetsent_time;
 
@@ -71,7 +72,9 @@ extern gcontext_t	gctx;
 # define IS_ROOT (getuid() == 0)
 # define MAX_PACKET_SIZE 4096 // can change for IPV6 !!!!!
 # define PSEUDOINFINTY 99999999999
+# define PERCENTAGE(x, max) ((((double)(max) - (double)(x)) * 100.0) / (double)(max))
 # define DEFAULT_DATALEN (64 - 8)
+# define MAXWAITTIME 10
 
 error_code_t get_dest_info(const char* av[]
 #ifdef IS_IPV6_SUPORTED
@@ -83,10 +86,13 @@ error_code_t receive_pong(uint8_t* const dest, size_t dest_len, ssize_t* const b
 
 void pinger_loop();
 void terminate();
-void info();
 
-void print_packet(const void* const buff, ssize_t packet_len);
-void print_packet6(const void* const buff, ssize_t packet_len);
+error_code_t print_packet4(const void* const packetbuff, ssize_t packet_len);
+error_code_t print_packet6(const void* const packetbuff, ssize_t packet_len);
 
-void send_ping();
+void send_ping4();
 void send_ping6();
+
+/// Legacy utils
+void tvsub(struct timeval* out, struct timeval* in);
+unsigned short in_cksum(unsigned short *addr, int len);

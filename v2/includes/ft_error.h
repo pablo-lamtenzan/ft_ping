@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_error.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: plamtenz <plamtenz@student.42.fr>          +#+  +:+       +#+        */
+/*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 19:55:21 by pablo             #+#    #+#             */
-/*   Updated: 2021/10/15 20:50:46 by plamtenz         ###   ########.fr       */
+/*   Updated: 2021/10/16 18:02:55 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,3 +76,41 @@ IPv6 options:\n\
 # define MSG_INV_ARG_COUNT __progname ": invalid count of packets to transmit: `%s\'" "\n"
 # define MSG_INVALID_FAMILY __progname ": error: invalid family ( hint: %s )" "\n"
 # define MSG_MUST_BE_ROOT __progname ": error: user msut be root" "\n"
+
+# define ICMP_ERROR_MSG_0 "Echo Reply"
+# define ICMP_ERROR_MSG_1 "None"
+# define ICMP_ERROR_MSG_2 "None"
+# define ICMP_ERROR_MSG_3 "Dest unreachable"
+# define ICMP_ERROR_MSG_4 "Packet lost, slow down"
+# define ICMP_ERROR_MSG_5 "Shorter route"
+# define ICMP_ERROR_MSG_6 "None"
+# define ICMP_ERROR_MSG_7 "None"
+# define ICMP_ERROR_MSG_8 "Echo service"
+# define ICMP_ERROR_MSG_9 "Router advertisement"
+# define ICMP_ERROR_MSG_10 "Router solicitation"
+# define ICMP_ERROR_MSG_11 "Time to live exceeded"
+# define ICMP_ERROR_MSG_12 "IP header bad"
+# define ICMP_ERROR_MSG_13 "Timestamp request"
+# define ICMP_ERROR_MSG_14 "Timestamp reply"
+# define ICMP_ERROR_MSG_15 "Information request"
+# define ICMP_ERROR_MSG_16 "Information reply"
+# define ICMP_ERROR_MSG_17 "Address mask request"
+# define ICMP_ERROR_MSG_18 "Address mask reply"
+
+# define ICMP_ERROR_INFO_MSG_0 "(Bad net)"
+# define ICMP_ERROR_INFO_MSG_1 "(Bad host)"
+# define ICMP_ERROR_INFO_MSG_2 "(Bad protocol)"
+# define ICMP_ERROR_INFO_MSG_3 "(Bad port)"
+# define ICMP_ERROR_INFO_MSG_4 "(IP_DF cause drop)"
+# define ICMP_ERROR_INFO_MSG_5 "(Src routee failed)"
+# define ICMP_ERROR_INFO_MSG_6 "(Unknow net)"
+# define ICMP_ERROR_INFO_MSG_7 "(Unknow host)"
+# define ICMP_ERROR_INFO_MSG_8 "(Src host isolated)"
+# define ICMP_ERROR_INFO_MSG_9 "(Net denied)"
+# define ICMP_ERROR_INFO_MSG_10 "(Host denied)"
+# define ICMP_ERROR_INFO_MSG_11 "(Host denied)"
+# define ICMP_ERROR_INFO_MSG_12 "(Bad tos for net)"
+# define ICMP_ERROR_INFO_MSG_13 "(Bad tos for host)"
+# define ICMP_ERROR_INFO_MSG_14 "(Admin prohib)"
+# define ICMP_ERROR_INFO_MSG_15 "(Host prec vio.)"
+# define ICMP_ERROR_INFO_MSG_16 "(Prec cutoff)"

@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/03 19:29:35 by pablo             #+#    #+#             */
-/*   Updated: 2021/10/01 22:51:42 by pablo            ###   ########.fr       */
+/*   Updated: 2021/10/16 20:12:14 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 void pinger()
 {
-#ifndef __linux__
+#ifdef __linux__
 	packet_t packet_to_send = (packet_t){
 			.p_icp = (struct icmp){
 			.icmp_type = ICMP_ECHO,
@@ -61,7 +61,7 @@ void pinger()
 	}
 	else if (bytes_sent != msg_size)
 	{
-		printf("ping: wrote %s %ld chars, ret=%ld\n",
+		printf(__progname ": wrote %s %ld chars, ret=%ld\n",
 			gctx.hostaddr, msg_size, bytes_sent);
 	}
 }
