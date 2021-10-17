@@ -5,48 +5,57 @@ DEST=srcs.mk
 SRCDIR=${1:-srcs}
 INCDIR=${2:-includes}
 
-# $0="target dir", $1="depth"
+DEPTH=0
+
+function usage()
+{
+    echo -e "Usage: ${0} [ srcsdir ] [ incdir ]\\n(default are: \"${SRCDIR}/\", \"${INCDIR}/\")"
+}
+
+# $1="amount of tabs"
+function padd_tabs()
+{
+    local AMOUNT=${1}
+    while [[ ${AMOUNT} -ge 1 ]] ; do
+        echo -en "\\t"  >> ${DEST}
+        let AMOUNT--
+    done
+}
+
+# $1="entry point (a directory)"
 function index_dir()
 {
-    local DEPTH=${2:-1}
-    local OLD_DEPTH=${DEPTH}
-    local DEPTH_CP=${DEPTH}
-    while [ ${DEPTH_CP} -ge 2 ] ; do
-        echo -en "\\t" >> ${DEST}
-        let DEPTH_CP--
-    done
+    let DEPTH++
+    padd_tabs ${DEPTH}-1
     local BASENAME=`basename ${1}`
     echo -e "\$(addprefix ${BASENAME}/,\\" >> ${DEST}
     for i in ${1}/* ; do
         BASENAME=`basename ${i}`
         if [[ -d ${i} ]] ; then
-            let DEPTH++
-            index_dir ${i} ${DEPTH}
+            index_dir ${i}
         elif [[ -f ${i} ]] ; then
-            DEPTH_CP=${OLD_DEPTH}
-            while [ $DEPTH_CP -ge 2 ] ; do
-                echo -en "\\t" >> ${DEST}
-                let DEPTH_CP--
-            done
-            echo -e "\\t${BASENAME}\\" >> ${DEST}
+            padd_tabs ${DEPTH}-1
+            echo -e "\\t${BASENAME}\\"  >> ${DEST}
         fi
     done
-    DEPTH_CP=${OLD_DEPTH}
-    while [ $DEPTH_CP -ge 2 ] ; do
-        echo -en "\\t" >> ${DEST}
-        let DEPTH_CP--
-    done
-    echo -en ")" >> ${DEST}
-    if [ $DEPTH -ge 2 ] ; then
-        echo -en "\\" >> ${DEST}
+    padd_tabs ${DEPTH}-1
+    echo -en ")"  >> ${DEST}
+    if [[ ${DEPTH} -ge 2 ]] ; then
+        echo -en "\\"  >> ${DEST}
     fi
-    echo -e >> ${DEST}
+    echo >> ${DEST}
+    let DEPTH--
 }
 
 if [ -f ${DEST} ] ; then
     rm ${DEST}
 fi
-    
+
+if [ ! -d ${SRCDIR} ] || [ ! -d ${INCDIR} ] ; then
+    echo "Error: Invalid SRCDIR (${SRCDIR}) or INCDIR (${INCDIR}), must be a directory"
+    usage
+fi
+
 echo -e "INCDIR\\t=\\t${INCDIR}\nSRCDIR\t=\\t${SRCDIR}\\n" >> ${DEST}
 
 echo -e "HDRS\\t=\\" >> ${DEST}
