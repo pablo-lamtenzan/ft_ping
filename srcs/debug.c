@@ -6,12 +6,13 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/01 22:57:42 by pablo             #+#    #+#             */
-/*   Updated: 2021/09/01 22:58:44 by pablo            ###   ########.fr       */
+/*   Updated: 2021/10/16 21:43:56 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # ifndef DEBUG
 
+# include <parse.h>
 # include <ping.h>
 
 # include <stdio.h>
@@ -36,11 +37,11 @@ void print_opts()
     dprintf(2, "[DEBUG] Options values:\n\t-mark: %d\n\t-preload: %d\n"
     "\t-pmtudisc: %d\n\t-deadline: %d\n\t-timeout: %d\n\t-pattern: [%s]"
     "\n\t-tos: %d\n\t-sndbuff: %d\n\t-ttl: %d\n\t-timestamp: %d\n\n",
-    gctx.const_parse->opts_args.mark, gctx.const_parse->opts_args.preload,
-    gctx.const_parse->opts_args.pmtudisc_opts, gctx.const_parse->opts_args.deadline,
-    gctx.const_parse->opts_args.timeout, USE_OPT_ARG_PATTERN,
-    gctx.const_parse->opts_args.tos, gctx.const_parse->opts_args.sndbuff,
-    gctx.const_parse->opts_args.ttl, gctx.const_parse->opts_args.timestamp);
+    gctx.parse.opts_args.mark, gctx.parse.opts_args.preload,
+    gctx.parse.opts_args.pmtudisc_opts, gctx.parse.opts_args.deadline,
+    gctx.parse.opts_args.timeout, USE_OPT_ARG_PATTERN,
+    gctx.parse.opts_args.tos, gctx.parse.opts_args.sndbuff,
+    gctx.parse.opts_args.ttl, gctx.parse.opts_args.timestamp);
 }
 
 # endif

@@ -6,13 +6,15 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 19:52:07 by pablo             #+#    #+#             */
-/*   Updated: 2021/09/29 23:33:04 by pablo            ###   ########.fr       */
+/*   Updated: 2021/10/16 21:55:02 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+# include <parse.h>
 # include <ping.h>
 
 # include <stdbool.h>
+# include <stdint.h>
 # include <stdlib.h>
 # include <stdio.h>
 # include <unistd.h>
@@ -142,6 +144,7 @@ error_su:
 __attribute__ ((cold))
 static bool     parse_interface_arg(const char* arg)
 {
+    (void)arg;
     // TO DO: When i ll understand how this works
 
     return (true);
@@ -165,7 +168,7 @@ static bool     parse_pmtudisc_arg(const char* arg)
             break ;
         }
     }
-    if (gctx.const_parse->opts_args.pmtudisc_opts == 0)
+    if (gctx.parse.opts_args.pmtudisc_opts == 0)
     {
         PRINT_ERROR(MSG_INV_ARG_PREFFIX2, arg - 1, arg);
         return (false);
@@ -345,7 +348,7 @@ static bool     parse_timestamp_arg(const char* arg)
             break ;
         }
     }
-    if (gctx.const_parse->opts_args.timestamp == 0)
+    if (gctx.parse.opts_args.timestamp == 0)
     {
         PRINT_ERROR(MSG_INV_ARG_BAD_TIMESTAMP, arg);
         return (false);

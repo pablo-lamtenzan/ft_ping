@@ -1,39 +1,39 @@
-# TO DO: Of course i need a better makefile to precced with this project
+NAME		=		ft_ping
+OBJDIR		=		bin_objs
+CC			=		/usr/bin/gcc
+RM			=		/bin/rm
 
-NAME=ft_ping
-CFLAGS= -Wall -Wextra -Werror -lm #-g3 -fsanitize=address
+include srcs.mk
 
-SRCDIR = srcs
+CFLAGS		=		-Wall -Wextra -Werror
+IFLAGS		=		-I$(INCDIR)
 
-PARSE= $(addprefix parse/, parse_opts.c)
-MAIN= $(addprefix main/, main.c)
-LEGACY= $(addprefix legacy/, in_cksum.c in_tvsub.c)
-CORE= get_hostaddr.c pinger.c resolve_dest_addr.c sig_handlers.c print_packet.c
-DEBUG= debug.c 
-ERROR_HANDLING= #error.c
+OBJS		=		$(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRCS))
 
-SRCS= $(MAIN) $(ERROR_HANDLING) $(PARSE) $(LEGACY) $(CORE) $(DEBUG)
-			
-OBJDIR=bin
-OBJS= $(addprefix $(OBJDIR)/, $(SRCS:.c=.o))
+all:				$(NAME)
 
-all: $(NAME)
-	@echo Done.
-
-$(NAME) : $(OBJDIR) $(OBJS)
-	gcc -o $(NAME) $(CFLAGS) $(OBJS)
+$(NAME):			$(OBJS)
+	@echo LINK $@
+	$(CC) $(OBJS) $(CFLAGS) -o $@
 
 $(OBJDIR):
 	mkdir -p $@
 
-$(OBJDIR)/%.o : srcs/%.c
-	mkdir -p $(shell dirname $@)
-	gcc -c -o $@  -I./includes $<
+$(OBJDIR)/%.o:		$(SRCDIR)/%.c $(HDRS) $(OBJDIR)
+	@mkdir -p '$(@D)'
+	@echo CC $<
+	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $@ $<
 
 clean:
-	rm -rf $(OBJDIR)
+	@echo RM $(OBJDIR)
+	@$(RM) -rf $(OBJDIR)
 
-fclean: clean
-	rm -rf $(NAME)
+fclean:				clean
+	@echo RM $(NAME)
+	@$(RM) -f $(NAME)
 
-re: fclean all
+re:					fclean all
+
+.PHONY:				clean fclean
+
+$(VERBOSE).SILENT:
