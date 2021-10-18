@@ -4,50 +4,16 @@
 # include <sys/socket.h>
 # include <netdb.h>
 
-#ifdef __linux__
-# include <bits/local_lim.h> // for HOST_NAME_MAX solves the problem
-#elif __APPLE__
-# ifndef HOST_NAME_MAX
-#  define HOST_NAME_MAX 255
-# endif
-#endif
+/** NOTE: This set ipv6 by default
+// # define IS_IPV6(opts)	( \
+// 				(!(opts & OPT_IPV4_ONLY) && !(opts & OPT_IPV6_ONLY)) \
+// 				|| (opts & OPT_IPV6_ONLY))
+*/
 
-# define IS_IPV6(opts)	( \
-				(!(opts & OPT_IPV4_ONLY) && !(opts & OPT_IPV6_ONLY)) \
-				|| (opts & OPT_IPV6_ONLY))
+# define IS_IPV6(opts) ( \
+    opts & OPT_IPV6_ONLY)
 
-
-__attribute__ ((always_inline))
-static inline const char* get_dest_dns(
-#ifdef IS_IPV6_SUPORTED
-    bool is_ipv6
-#endif
-)
-{
-    static char buff[HOST_NAME_MAX];
-
-    struct sockaddr_in* sin;
-
-#ifdef IS_IPV6_SUPORTED
-
-    struct sockaddr_in6* sin6;
-
-    if (is_ipv6)
-        sin6 = (struct sockaddr_in6*)gctx.dest_info->ai_addr;
-	else
-        sin = (struct sockaddr_in*)gctx.dest_info->ai_addr;
-#endif
-
-    return inet_ntop(
-#ifdef IS_IPV6_SUPORTED
-	is_ipv6 ? AF_INET6 :
-#endif
-	AF_INET,
-#ifdef IS_IPV6_SUPORTED
-	is_ipv6 ? (void*)&sin6->sin6_addr :
-#endif
-	(void*)&sin->sin_addr, buff, ARR_SIZE(buff));
-}
+# include <string.h> // todo remove
 
 error_code_t get_dest_info(const char* av[]
 #ifdef IS_IPV6_SUPORTED
@@ -61,40 +27,57 @@ error_code_t get_dest_info(const char* av[]
     *is_ipv6 = IS_IPV6(gctx.parse.opts);
 # endif
 
+    struct addrinfo* dest = NULL;
     struct addrinfo hints = (struct addrinfo){
-        .ai_flags =  AI_CANONNAME, // .ai_cannoname points to the official name of the host
+        .ai_flags =  AI_CANONNAME,
         .ai_family =
 #ifdef IS_IPV6_SUPORTED
         *is_ipv6 ? AF_INET6 :
 #endif
         AF_INET,
         .ai_socktype = SOCK_RAW,
-        .ai_protocol = IPPROTO_ICMP
+        .ai_protocol =
+#ifdef IS_IPV6_SUPORTED
+        *is_ipv6 ? IPPROTO_ICMPV6 :
+#endif
+        IPPROTO_ICMP
     };
 
-    if (getaddrinfo(*av, (void*)0, &hints, &gctx.dest_info) != 0)
+    if (getaddrinfo(*av, 0, &hints, &dest) != 0)
     {
         st = ERR_DEST_REQ;
+        PRINT_ERROR(MSG_UNKNOWN_DESTINATION, *av);
         goto error;
     }
 
-    if (*is_ipv6 && gctx.dest_info->ai_addr->sa_family != AF_INET6)
+    /// TODO: LIBC ...
+    memcpy((uint8_t*)gctx.dest_dns, dest->ai_canonname, strlen(dest->ai_canonname));
+
+#ifdef IS_IPV6_SUPORTED
+    if (*is_ipv6 && dest->ai_family != AF_INET6)
     {
         PRINT_ERROR(MSG_INVALID_FAMILY, "not IPV6");
         st = ERR_INV_FAM;
         goto error;
     }
-
-    if ((gctx.dest_dns = get_dest_dns(
-#ifdef IS_IPV6_SUPORTED
-        *is_ipv6
 #endif
-        )) == 0)
+
+    /// TODO: Or ipv6 version ...
+    const struct in_addr* const sin_addr = &((struct sockaddr_in*)dest->ai_addr)->sin_addr; 
+
+    gctx.dest_sockaddr = (struct sockaddr_in){
+        .sin_addr.s_addr = sin_addr->s_addr,
+        .sin_family = AF_INET,
+    };
+
+    if (inet_ntop(dest->ai_family, (const void*)sin_addr,
+    (char*)gctx.dest_ip, ARR_SIZE(gctx.dest_ip)) == 0)
     {
         st = ERR_SYSCALL;
         PRINT_ERROR(INVALID_SYSCALL, "inet_ntop");
     }
 
 error:
+    freeaddrinfo(dest);
     return st;
 }

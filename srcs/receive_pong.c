@@ -5,20 +5,24 @@
 # include <netinet/in.h>
 # include <errno.h>
 
+#ifdef DEBUG
+# include <debug.h>
+#endif
+
 error_code_t receive_pong(uint8_t* const dest, size_t dest_len, ssize_t* const bytes_recv)
 {
     error_code_t st = SUCCESS;
 
-    struct msghdr mhdr = {
-        .msg_name = gctx.dest_info->ai_addr,
-        .msg_namelen = sizeof(gctx.dest_info->ai_addr),
+    struct msghdr mhdr = (struct msghdr){
+        .msg_name = &gctx.dest_sockaddr,
+        .msg_namelen = sizeof(gctx.dest_sockaddr),
         .msg_iov = (struct iovec[]){{
             .iov_base = dest,
             .iov_len = dest_len
         }},
         .msg_iovlen = 1,
-        .msg_control = NULL, // todo can put a buff[512 bytes] here to have more info
-        .msg_controllen = sizeof(NULL),
+        .msg_control = (uint8_t[0X200]){},
+        .msg_controllen = ARR_SIZE((uint8_t[0X200]){}),
         .msg_flags = 0
     };
 
@@ -28,8 +32,13 @@ error_code_t receive_pong(uint8_t* const dest, size_t dest_len, ssize_t* const b
         if (errno == EINTR)
             st = CONTINUE;
         else
+        {
             st = ERR_SYSCALL;
-        PRINT_ERROR(INVALID_SYSCALL, "recvmsg");
+            PRINT_ERROR(INVALID_SYSCALL, "recvmsg");
+        }
     }
+#ifdef DEBUG
+    print_packet_data(dest, *bytes_recv, "RECV");
+#endif
     return st;
 }

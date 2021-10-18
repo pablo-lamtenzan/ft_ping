@@ -4,9 +4,16 @@
 # include <netinet/ip.h>
 # include <netinet/ip_icmp.h>
 
-# define PRINT_STATS(bytes, from, seq, ttl, time) \
-        printf("%hu bytes from %s: icmp seq=%hu ttl=%hu time=%.3f ms\n", \
-        bytes, from, seq, ttl, time)
+# include <string.h> /// TODO: LIBC
+
+# define PRINT_STATS(bytes, from, ip, seq, ttl, time) ( \
+            (!ip) ? \
+                printf("%hu bytes from %s: icmp_seq=%hu ttl=%hu time=%.1f ms\n", \
+                bytes, from, seq, ttl, time) \
+            : \
+            printf("%hu bytes from %s (%s): icmp_seq=%hu ttl=%hu time=%.1f ms\n", \
+                bytes, from, ip, seq, ttl, time) \
+        )
 
 # define PRINT_ICMP_ERROR(from, seq, verbose, error, error_info) ( \
         (verbose) ? \
@@ -21,9 +28,7 @@
 # define ICMP_MINLEN 8
 #endif
 
-
-# define GET_TV_FROM_PACKET(packetptr) (struct timeval*)(packetptr + sizeof(struct iphdr) + sizeof(struct icmphdr) + 4)
-# define TV_TO_MS(tv) (double)((double)(tv.tv_sec) * 1000.0 + (double)(tv.tv_usec) / 1000.0)
+# define GET_TV_FROM_PACKET(packetptr) (struct timeval*)(packetptr + sizeof(struct iphdr) + sizeof(struct icmphdr))
 
 __attribute__ ((always_inline))
 static inline void handle_other_replies(struct icmphdr* icp, char* const address, const void* const packetbuff)
@@ -58,15 +63,12 @@ static inline void handle_other_replies(struct icmphdr* icp, char* const address
 static double get_time_diff(struct timeval* packet_tv)
 {
     struct timeval now_tv;
-    gettimeofday(&now_tv, &gctx.tz);
 
-    /// OPTION 1 (preferable)
+    gettimeofday(&now_tv, &gctx.tz);
     tvsub(&now_tv, packet_tv);
 
-    /// OPTION 2
-    /// tvsub(&now_tv, &gctx.tsend_date );
-
     const double t = TV_TO_MS(now_tv);
+
     gctx.tsum += t;
     if (t < gctx.tmin)
         gctx.tmin = t;
@@ -77,27 +79,28 @@ static double get_time_diff(struct timeval* packet_tv)
 
 error_code_t print_packet4(const void* const packetbuff, ssize_t packet_len)
 {
-
-    ///TODO: A version using packet_t
-
     error_code_t st = SUCCESS;
     const struct iphdr* const ip = (const struct iphdr* const)packetbuff;
     const struct icmphdr* const icp = (const struct icmphdr* const)(packetbuff + sizeof(*ip));
 
     const uint8_t hl = ip->ihl << 2; // TODO: This value may change depend on endianess
 
-    char addrbuff[INET_ADDRSTRLEN] = {0};
+    // char addrbuff[INET_ADDRSTRLEN] = {0};
 
-    if (inet_ntop(AF_INET, gctx.dest_dns, addrbuff, ARR_SIZE(addrbuff)) == 0)
-    {
-        PRINT_ERROR(INVALID_SYSCALL, "inet_ntop");
-        st = ERR_SYSCALL;
-        goto end;
-    }
+    // if (inet_ntop(AF_INET, gctx.dest_dns, addrbuff, ARR_SIZE(addrbuff)) == 0)
+    // {
+    //     PRINT_ERROR(INVALID_SYSCALL, "inet_ntop");
+    //     st = ERR_SYSCALL;
+    //     goto end;
+    // }
+
+    ///TODO: Maybe need to calculate using the ip header ther source address
+    // NOT MAYBE, I MUST DO IT !!!!
 
     if (packet_len < hl + ICMP_MINLEN)
     {
         ///TODO: Verbose stuff
+        printf("%s", "{DEBUG} PACKET TOO SHORT\n");
         goto end;
     }
 
@@ -106,6 +109,7 @@ error_code_t print_packet4(const void* const packetbuff, ssize_t packet_len)
         if (icp->un.echo.id != gctx.prog_id)
         {
             ///TODO: Maybe verbose stuff
+            printf("{DEBUG} ID: %hu != from prog id (%hu)\n", icp->un.echo.id, gctx.prog_id);
             goto end;
         }
 
@@ -113,11 +117,12 @@ error_code_t print_packet4(const void* const packetbuff, ssize_t packet_len)
 
         /// TODO: ntohs forbiden !!!
         /// TODO: Perhabs the printing format is bad or there could be some condition too
-        PRINT_STATS((uint16_t)(((ntohs(ip->tot_len)) & 0XFFFF) - sizeof(*ip)), addrbuff,
+        PRINT_STATS((uint16_t)(((ntohs(ip->tot_len)) & 0XFFFF) - sizeof(*ip)), gctx.dest_dns,
+        strcmp((const char*)gctx.dest_ip, (const char*)gctx.dest_dns) ? gctx.dest_ip : NULL,
         icp->un.echo.sequence, ip->ttl, get_time_diff(GET_TV_FROM_PACKET(packetbuff)));
     }
     else
-        handle_other_replies((struct icmphdr*)icp, addrbuff, packetbuff);
+        handle_other_replies((struct icmphdr*)icp, (char*)gctx.dest_ip, packetbuff);
 
 end:
     return st;
