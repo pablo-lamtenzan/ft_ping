@@ -3,9 +3,9 @@ OBJDIR		=		bin_objs
 CC			=		/usr/bin/gcc
 RM			=		/bin/rm
 
-include srcs.mk
+include				srcs.mk
 
-CFLAGS		=		-Wall -Wextra -Werror
+CFLAGS		=		-Wall -Wextra -Werror -g3 -fsanitize=address
 IFLAGS		=		-I$(INCDIR)
 
 OBJS		=		$(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRCS))
