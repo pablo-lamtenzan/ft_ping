@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 19:52:07 by pablo             #+#    #+#             */
-/*   Updated: 2021/10/20 19:11:11 by pablo            ###   ########.fr       */
+/*   Updated: 2021/10/20 23:47:20 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 # include <ftlibc.h>
 
 # include <stdint.h>
-# include <stdlib.h>
 # include <unistd.h>
 
 __attribute__ ((pure))
@@ -210,7 +209,7 @@ static bool     parse_timeout_arg(const char* arg)
         format_ptr = MSG_INV_ARG_STR;
         goto error;
     }
-    int64_t value = strtol(arg, NULL, 0);
+    int64_t value = ft_strtol(arg, NULL, 0);
     if (ft_strlen(arg) > 7 || value < 0)
     {
         format_ptr = MSG_INV_ARG_BAD_TIMEOUT;
@@ -250,7 +249,7 @@ static bool     parse_tos_arg(const char* arg)
         format_ptr = MSG_INV_ARG_BAD_TOS;
         goto error;
     }
-    int64_t value = strtol(arg, NULL, 0);
+    int64_t value = ft_strtol(arg, NULL, 0);
     if (value < 0 || value > UINT8_MAX)
     {
         format_ptr = MSG_INV_ARG_TOS_RANGE;
@@ -280,7 +279,7 @@ static bool     parse_sndbuff_arg(const char* arg)
         format_ptr = MSG_INV_ARG_LEN;
         goto error;
     }
-    int64_t value = strtol(arg, NULL, 0);
+    int64_t value = ft_strtol(arg, NULL, 0);
     if (value > INT32_MAX || value < 1)
     {
         format_ptr = MSG_INV_ARG_RANGE_INT2;
@@ -310,7 +309,7 @@ static bool     parse_ttl_arg(const char* arg)
         format_ptr = MSG_INV_ARG_LEN;
         goto error;
     }
-    int64_t value = strtol(arg, NULL, 0);
+    int64_t value = ft_strtol(arg, NULL, 0);
     if (value > UINT8_MAX || value < 1)
     {
         format_ptr = MSG_INV_ARG_RANGE_UCHAR;
@@ -389,8 +388,8 @@ error_code_t    parse_opts(const char** av[])
         "-m", "-l", "-I", "-M",
         "-w", "-W", "-p", "-Q",
         "-S", "-t", "-T", "-c",
-        "-4", "-6", "-v", "-h",
-        "-f", "-n"
+        "-i", "-s", "-4", "-6",
+        "-v", "-h", "-f", "-n"
     };
 
     static const fill_opt_args_t fillers[] = {

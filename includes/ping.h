@@ -33,8 +33,8 @@ typedef struct 		gcontext
     size_t              packet_datalen;
 	int					sockfd;
 	uint16_t			prog_id;
-	struct timezone		tz;
 	struct timeval		start_time;
+	struct timeval		deadline_time;
 
 	struct
 	{

@@ -59,9 +59,11 @@ typedef enum		opts_masks
 	OPT_TTL			= (OPT_SNDBUFF << 1),	// '-t' option
 	OPT_TIMESTAMP	= (OPT_TTL << 1),		// '-T' option
 	OPT_COUNT		= (OPT_TIMESTAMP << 1),	// '-c' option
+	OPT_INTERVAL	= (OPT_COUNT << 1),		// '-i' option
+	OPT_PACKET_SZ	= (OPT_INTERVAL << 1),	// '-s' option
 
 	/* Otps without argument */
-	OPT_IPV4_ONLY	= (OPT_COUNT << 1),		// '-4' option
+	OPT_IPV4_ONLY	= (OPT_PACKET_SZ << 1),	// '-4' option
 	OPT_IPV6_ONLY	= (OPT_IPV4_ONLY << 1),	// '-6' option
 	OPT_VERBOSE		= (OPT_IPV6_ONLY << 1),	// '-v' option
 	OPT_HELP		= (OPT_VERBOSE << 1),	// '-h' option

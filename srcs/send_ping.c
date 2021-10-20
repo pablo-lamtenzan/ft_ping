@@ -1,16 +1,16 @@
 
-# include <ping.h>
-# include <ftlibc.h>
+#include <ping.h>
+#include <ftlibc.h>
 
-# include <netinet/in.h>
-# include <netinet/ip.h>
-# include <netinet/ip_icmp.h>
-# include <stdlib.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
+#include <stdlib.h>
 
 #ifdef IS_IPV6_SUPORTED
 
-# include <netinet/ip6.h>
-# include <netinet/icmp6.h>
+#include <netinet/ip6.h>
+#include <netinet/icmp6.h>
 
 #define TOTALPACKET_SIZE6(msg_size) (sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr) + msg_size)
 
@@ -33,9 +33,9 @@
 void send_ping4()
 {
 	uint8_t packet[MAX_PACKET_SIZE] = {0};
-	struct iphdr* const ip = (struct iphdr* const)packet;
-	struct icmphdr* const icp = (struct icmphdr* const)(packet + sizeof(*ip));
-	struct timeval* const tp = (struct timeval* const)(packet + sizeof(*ip) + sizeof(*icp));
+	struct iphdr *const ip = (struct iphdr *const)packet;
+	struct icmphdr *const icp = (struct icmphdr *const)(packet + sizeof(*ip));
+	struct timeval *const tp = (struct timeval *const)(packet + sizeof(*ip) + sizeof(*icp));
 
 	*ip = (struct iphdr){
 		.version = 4,
@@ -45,11 +45,10 @@ void send_ping4()
 		.id = 0,
 		.frag_off = 0,
 		.ttl = OPT_HAS(OPT_TTL) ? gctx.parse.opts_args.ttl : 0X40,
-		.protocol =IPPROTO_ICMP,
+		.protocol = IPPROTO_ICMP,
 		.check = 0,
 		.saddr = INADDR_ANY,
-		.daddr = (*((struct sockaddr_in*)&gctx.dest_sockaddr)).sin_addr.s_addr
-	};
+		.daddr = (*((struct sockaddr_in *)&gctx.dest_sockaddr)).sin_addr.s_addr};
 
 	*icp = (struct icmphdr){
 		.type = ICMP_ECHO,
@@ -59,7 +58,7 @@ void send_ping4()
 		.un.echo.sequence = gctx.nb_packets_transmited,
 	};
 
-	if (gettimeofday(tp, &gctx.tz) != 0)
+	if (gettimeofday(tp, NULL) != 0)
 	{
 		PRINT_ERROR(INVALID_SYSCALL, "gettimeofday");
 		exit(ERR_SYSCALL);
@@ -69,14 +68,14 @@ void send_ping4()
 
 	const ssize_t total_packet_size = TOTALPACKET_SIZE4(gctx.packet_datalen);
 
-	icp->checksum = in_cksum((uint16_t*)(packet + sizeof(*ip)), gctx.packet_datalen + sizeof(*icp));
+	icp->checksum = in_cksum((uint16_t *)(packet + sizeof(*ip)), gctx.packet_datalen + sizeof(*icp));
 
 	const ssize_t bytes_sent = sendto(
 		gctx.sockfd,
-		(const void*)packet,
+		(const void *)packet,
 		(const size_t)total_packet_size,
 		0,
-		(const struct sockaddr*)&gctx.dest_sockaddr,
+		(const struct sockaddr *)&gctx.dest_sockaddr,
 		sizeof(const struct sockaddr));
 
 	if (bytes_sent < 0)
@@ -92,6 +91,12 @@ void send_ping4()
 
 	gctx.nb_packets_transmited++;
 
+	if (OPT_HAS(OPT_FLOOD))
+	{
+		printf("%c", '.');
+		fflush(stdout);
+	}
+
 #ifdef DEBUG
 	print_packet_data((uint8_t *)packet, total_packet_size, "SEND");
 #endif
@@ -102,9 +107,9 @@ void send_ping4()
 void send_ping6()
 {
 	uint8_t packet[MAX_PACKET_SIZE] = {0};
-	struct ip6_hdr* const ip = (struct ip6_hdr*)packet;
-	struct icmp6_hdr* const icp = (struct icmp6_hdr*)(packet + sizeof(*ip));
-	struct timeval* const tp = (struct timeval*)(packet + sizeof(*ip) + sizeof(*icp));
+	struct ip6_hdr *const ip = (struct ip6_hdr *)packet;
+	struct icmp6_hdr *const icp = (struct icmp6_hdr *)(packet + sizeof(*ip));
+	struct timeval *const tp = (struct timeval *)(packet + sizeof(*ip) + sizeof(*icp));
 
 	///TODO: INIT MORE !!!
 	// *ip = (struct ip6_hdr){
@@ -116,10 +121,9 @@ void send_ping6()
 		.icmp6_type = ICMP_ECHO,
 		.icmp6_code = 0,
 		.icmp6_cksum = 0,
-		.icmp6_dataun.icmp6_un_data16 = {gctx.prog_id, gctx.nb_packets_transmited}
-	};
+		.icmp6_dataun.icmp6_un_data16 = {gctx.prog_id, gctx.nb_packets_transmited}};
 
-	if (gettimeofday(tp, &gctx.tz) != 0)
+	if (gettimeofday(tp, NULL) != 0)
 	{
 		PRINT_ERROR(INVALID_SYSCALL, "gettimeofday");
 		exit(ERR_SYSCALL);
@@ -129,14 +133,14 @@ void send_ping6()
 
 	const ssize_t total_packet_size = TOTALPACKET_SIZE6(gctx.packet_datalen);
 
-	icp->icmp6_cksum = in_cksum((uint16_t*)(packet + sizeof(*ip)), gctx.packet_datalen + sizeof(*icp));
+	icp->icmp6_cksum = in_cksum((uint16_t *)(packet + sizeof(*ip)), gctx.packet_datalen + sizeof(*icp));
 
 	const ssize_t bytes_sent = sendto(
 		gctx.sockfd,
-		(const void*)packet,
+		(const void *)packet,
 		(const size_t)total_packet_size,
 		0,
-		(const struct sockaddr*)&gctx.dest_sockaddr,
+		(const struct sockaddr *)&gctx.dest_sockaddr,
 		sizeof(const struct sockaddr));
 
 	if (bytes_sent < 0)

@@ -13,8 +13,8 @@ error_code_t receive_pong(uint8_t* const dest, size_t dest_len, ssize_t* const b
     error_code_t st = SUCCESS;
 
     struct msghdr mhdr = (struct msghdr){
-        .msg_name = (struct sockaddr_in[]){},
-        .msg_namelen = sizeof(struct sockaddr_in),
+        .msg_name = OPT_HAS(OPT_IPV6_ONLY) ? (void*)(struct sockaddr_in6[]){} : (void*)(struct sockaddr_in[]){},
+        .msg_namelen = OPT_HAS(OPT_IPV6_ONLY) ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in),
         .msg_iov = (struct iovec[]){{
             .iov_base = dest,
             .iov_len = dest_len
@@ -36,6 +36,7 @@ error_code_t receive_pong(uint8_t* const dest, size_t dest_len, ssize_t* const b
             PRINT_ERROR(INVALID_SYSCALL, "recvmsg");
         }
     }
+
 #ifdef DEBUG
     print_packet_data(dest, *bytes_recv, "RECV");
 #endif
