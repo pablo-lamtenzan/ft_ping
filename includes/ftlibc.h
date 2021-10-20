@@ -6,6 +6,7 @@
 
 uint16_t    ft_htons(uint16_t x);
 uint16_t    ft_ntohs(uint16_t x);
+char*       ft_inet_ntoa (struct in_addr in);
 void        ft_memcpy(void *restrict dest, const void* restrict src, size_t n);
 void*       ft_memset(void* s, int c, size_t n);
 size_t      ft_strlen(const char* s);

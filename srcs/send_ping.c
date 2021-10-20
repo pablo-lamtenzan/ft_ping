@@ -1,15 +1,16 @@
 
-#include <ping.h>
+# include <ping.h>
+# include <ftlibc.h>
 
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#include <netinet/ip_icmp.h>
-#include <stdlib.h>
+# include <netinet/in.h>
+# include <netinet/ip.h>
+# include <netinet/ip_icmp.h>
+# include <stdlib.h>
 
 #ifdef IS_IPV6_SUPORTED
 
-#include <netinet/ip6.h>
-#include <netinet/icmp6.h>
+# include <netinet/ip6.h>
+# include <netinet/icmp6.h>
 
 #define TOTALPACKET_SIZE6(msg_size) (sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr) + msg_size)
 
@@ -29,8 +30,6 @@
 	printf("\nPRINT SOCKADDR:\n\t-sin_family: %hd\n\t-sin_port: %hu\n\t-sin_addr.s_addr: %u\n\n", \
 		   (s).sin_family, (s).sin_port, (s).sin_addr.s_addr))
 
-#include <string.h> /// TODO: Remove
-
 void send_ping4()
 {
 	uint8_t packet[MAX_PACKET_SIZE] = {0};
@@ -40,20 +39,17 @@ void send_ping4()
 
 	*ip = (struct iphdr){
 		.version = 4,
-		.ihl = sizeof(struct iphdr) >> 2,
+		.ihl = 5,
 		.tos = OPT_HAS(OPT_TOS) ? gctx.parse.opts_args.tos : 0,
 		.tot_len = gctx.packet_datalen + sizeof(*ip) + sizeof(*icp),
 		.id = 0,
 		.frag_off = 0,
 		.ttl = OPT_HAS(OPT_TTL) ? gctx.parse.opts_args.ttl : 0X40,
-		.protocol =
-#ifdef IS_IPV6_SUPORTED
-			OPT_HAS(OPT_IPV6_ONLY) ? IPPROTO_ICMPV6 :
-#endif
-								   IPPROTO_ICMP,
+		.protocol =IPPROTO_ICMP,
 		.check = 0,
 		.saddr = INADDR_ANY,
-		.daddr = (*((struct sockaddr_in*)&gctx.dest_sockaddr)).sin_addr.s_addr};
+		.daddr = (*((struct sockaddr_in*)&gctx.dest_sockaddr)).sin_addr.s_addr
+	};
 
 	*icp = (struct icmphdr){
 		.type = ICMP_ECHO,

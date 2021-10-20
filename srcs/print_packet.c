@@ -4,6 +4,7 @@
 
 # include <netinet/ip.h>
 # include <netinet/ip_icmp.h>
+# include <stdlib.h>
 
 # define PRINT_STATS(bytes, from, ip, seq, ttl, time) ( \
             (!ip) ? \
@@ -20,7 +21,7 @@
             : \
                 printf("From %s ", from)); \
             ((verbose) ? \
-                printf("icmp_seq=%hu %s %s\n", seq, error, error_info) \
+                printf("icmp_seq=%hu %s (%s)\n", seq, error, error_info) \
             : \
                 printf("icmp_seq=%hu %s\n", seq, error) \
         )
@@ -28,10 +29,6 @@
 # define PRINT_PACKET_TO_SHORT_ERR(bytes, from) ( \
             printf("packet too short (%ld bytes) from %s\n", bytes, from) \
         )
-
-#ifndef ICMP_MINLEN
-# define ICMP_MINLEN 8
-#endif
 
 # define GET_TV_FROM_PACKET(packetptr) (struct timeval*)(packetptr + sizeof(struct iphdr) + sizeof(struct icmphdr))
 
@@ -144,10 +141,7 @@ static inline void handle_other_replies(struct icmphdr* const icp, const char* c
 
     gctx.nb_packets_error++;
 
-    /// TODO: Calc dest ip
-    /// TODO: Is strcmp the way ?
-    PRINT_ICMP_ERROR(address, ft_strcmp((const char*)gctx.dest_ip, (const char*)gctx.dest_dns) ? gctx.dest_ip : NULL,
-    icp->un.echo.sequence, OPT_HAS(OPT_VERBOSE), type, code);
+    PRINT_ICMP_ERROR(address, address, icp->un.echo.sequence, OPT_HAS(OPT_VERBOSE), type, code);
 }
 
 static double get_time_diff(struct timeval* packet_tv)
@@ -173,40 +167,31 @@ error_code_t print_packet4(const void* const packetbuff, ssize_t packet_len)
     const struct iphdr* const ip = (const struct iphdr* const)packetbuff;
     const struct icmphdr* const icp = (const struct icmphdr* const)(packetbuff + sizeof(*ip));
 
-    // char addrbuff[INET_ADDRSTRLEN] = {0};
+    char* src_ip = (char*)gctx.dest_ip;
 
-    // if (inet_ntop(AF_INET, gctx.dest_dns, addrbuff, ARR_SIZE(addrbuff)) == 0)
-    // {
-    //     PRINT_ERROR(INVALID_SYSCALL, "inet_ntop");
-    //     st = ERR_SYSCALL;
-    //     goto end;
-    // }
+    if (OPT_HAS(OPT_TTL))
+        src_ip = ft_inet_ntoa((struct in_addr){.s_addr=ip->saddr});
 
-    ///TODO: Maybe need to calculate using the ip header ther source address
-    // NOT MAYBE, I MUST DO IT !!!!
-
-    if (packet_len < (ip->ihl << 2) + ICMP_MINLEN)
-        PRINT_PACKET_TO_SHORT_ERR(packet_len, gctx.dest_dns);
+    if (packet_len < (ip->ihl << 2) + (uint32_t)sizeof(*icp))
+    {
+        if (OPT_HAS(OPT_VERBOSE))
+            PRINT_PACKET_TO_SHORT_ERR(packet_len, gctx.dest_dns);
+        goto end;
+    }
 
     if (icp->type == ICMP_ECHOREPLY)
     {
         if (icp->un.echo.id != gctx.prog_id)
-        {
-            ///TODO: Maybe verbose stuff
-            printf("{DEBUG} ID: %hu != from prog id (%hu)\n", icp->un.echo.id, gctx.prog_id);
             goto end;
-        }
 
         gctx.nb_packets_received++;
 
-        /// TODO: ntohs forbiden !!!
-        /// TODO: Perhabs the printing format is bad or there could be some condition too
         PRINT_STATS((uint16_t)(((ft_ntohs(ip->tot_len)) & 0XFFFF) - sizeof(*ip)), gctx.dest_dns,
-        ft_strcmp((const char*)gctx.dest_ip, (const char*)gctx.dest_dns) ? gctx.dest_ip : NULL, // TODO: replace strcmpby condition on GET_DESTADDR
+        ft_strcmp((const char*)src_ip, (const char*)gctx.dest_dns) ? src_ip : NULL, // TODO: replace strcmpby condition on GET_DESTADDR
         icp->un.echo.sequence, ip->ttl, get_time_diff(GET_TV_FROM_PACKET(packetbuff)));
     }
     else
-        handle_other_replies((struct icmphdr*)icp, (char*)gctx.dest_ip);
+        handle_other_replies((struct icmphdr*)icp, src_ip);
 
 end:
     return st;

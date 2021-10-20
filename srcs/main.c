@@ -5,12 +5,7 @@
 ///TODO: Handle ipv6 for new type in global context
 ///TODO: Hanlde ipv6 globaly
 ///TODO: mdev on stats
-///TODO: verbose
 ///TODO: bonus flags (test & compare with true ping)
-
-///TODO: Try use ntohs & htons while sending & printing packets
-// do my own version of those. Maybe their absence is the reason
-// tll 1 does not work as expected 
 
 # include <sys/socket.h>
 # include <signal.h>
@@ -27,7 +22,6 @@
 # define GET_SIZE_V6(mgs_size) (sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr) + (msg_size))
 
 #endif
-
 
 # define IS_IPV6(opts) (opts & OPT_IPV6_ONLY)
 
