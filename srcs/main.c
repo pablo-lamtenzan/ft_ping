@@ -1,28 +1,79 @@
 # include <parse.h>
 # include <ping.h>
 
-///TODO: LIBC for parse ...
 ///TODO: Search why the makefile relink
 ///TODO: Handle ipv6 for new type in global context
 ///TODO: Hanlde ipv6 globaly
 ///TODO: mdev on stats
 ///TODO: verbose
 ///TODO: bonus flags (test & compare with true ping)
-///TODO: remove extra header includes
+
+///TODO: Try use ntohs & htons while sending & printing packets
+// do my own version of those. Maybe their absence is the reason
+// tll 1 does not work as expected 
 
 # include <sys/socket.h>
 # include <signal.h>
-# include <netdb.h>
 # include <netinet/in.h>
 # include <netinet/ip.h>
 # include <netinet/ip_icmp.h>
 # include <unistd.h>
 
+#ifdef IS_IPV6_SUPORTED
+
+#include <netinet/ip6.h>
+#include <netinet/icmp6.h>
+
+# define GET_SIZE_V6(mgs_size) (sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr) + (msg_size))
+
+#endif
+
+
+# define IS_IPV6(opts) (opts & OPT_IPV6_ONLY)
+
 # define PRINT_HELP (printf("%s", USAGE_HELP))
 
+# define GET_SIZE_V4(mgs_size) (sizeof(struct iphdr) + sizeof(struct icmphdr) + (msg_size))
+
+///TODO: Size changes if ipv6 !!!
 # define PRINT_HEADER(hostaddr) (printf("PING %s (%s): %lu(%lu) bytes of data.\n", \
 	*hostaddr ? hostaddr : gctx.dest_ip, \
 	gctx.dest_ip, gctx.packet_datalen, gctx.packet_datalen + sizeof(struct iphdr) + sizeof(struct icmphdr)))
+
+__attribute__ ((always_inline))
+static inline error_code_t check_initial_validity(int ac)
+{
+    error_code_t st = SUCCESS;
+
+    if (IS_ROOT == false)
+    {
+        PRINT_ERROR("%s", MSG_MUST_BE_ROOT);
+        st = ERR_PRIV;
+        goto error;
+    }
+
+    if (ac == 1)
+    {
+        PRINT_ERROR("%s", MSG_REQUIRED_DESTINATION);
+        st = ERR_DEST_REQ;
+    }
+
+error:
+    return st;
+}
+
+__attribute__ ((always_inline))
+static inline void start_ping_sender()
+{
+    PRINT_HEADER(gctx.dest_dns);
+
+    gettimeofday(&gctx.start_time, &gctx.tz);
+
+    while (gctx.parse.opts_args.preload-- > 0)
+        gctx.send_ping();
+
+    pinger_loop();
+}
 
 gcontext_t  gctx = (gcontext_t){
     .tmin = PSEUDOINFINTY,
@@ -32,6 +83,8 @@ gcontext_t  gctx = (gcontext_t){
 __attribute__ ((always_inline))
 static inline void spetialize_by_ipv4()
 {
+    gctx.get_dest_info = &gest_dest_info4;
+    gctx.init_socket = &init_socket4;
     gctx.send_ping = &send_ping4;
     gctx.print_packet = &print_packet4;
 }
@@ -41,6 +94,8 @@ static inline void spetialize_by_ipv4()
 __attribute__ ((always_inline))
 static inline void spetialize_by_ipv6()
 {
+    gctx.get_dest_info = &get_dest_info6;
+    gctx.init_socket = &init_socket6;
     gctx.send_ping = &send_ping6;
     gctx.print_packet = &print_packet6;
 }
@@ -55,21 +110,9 @@ int main(int ac, const char* av[])
 {
     error_code_t st;
 
-    if (IS_ROOT == false)
-    {
-        PRINT_ERROR("%s", MSG_MUST_BE_ROOT);
-        st = ERR_PRIV;
-        goto error;
-    }
-
-    if (ac == 1)
-    {
-        PRINT_ERROR("%s", MSG_REQUIRED_DESTINATION);
-        st = ERR_DEST_REQ;
-        goto error;
-    }
     ++av;
-    if ((st = parse_opts(&av)) != SUCCESS)
+    if ((st = check_initial_validity(ac)) != SUCCESS
+    || (st = parse_opts(&av)) != SUCCESS)
         goto error;
 
     gctx.nb_packets = gctx.parse.opts_args.count;
@@ -86,32 +129,13 @@ int main(int ac, const char* av[])
     }
 
 #ifdef IS_IPV6_SUPORTED
-    bool is_ipv6;
+    spetialize_by_ip_type(IS_IPV6(gctx.parse.opts));
+#else
+    spetialize_by_ipv4();
 #endif
 
-    if ((st = get_dest_info(av
-#ifdef IS_IPV6_SUPORTED
-        , &is_ipv6
-#endif
-    )) != SUCCESS)
-        goto error;
-
-    if (
-#ifdef IS_IPV6_SUPORTED
-        !is_ipv6 &&
-#endif
-        gctx.dest_sockaddr.sin_family != AF_INET)
-	{
-        PRINT_ERROR(MSG_INVALID_FAMILY, "not IPV4/IPV6");
-        st = ERR_INV_FAM;
-        goto error;
-    }
-
-    if ((st = init_socket(
-#ifdef IS_IPV6_SUPORTED
-        is_ipv6
-#endif
-    )) != SUCCESS)
+    if ((st = gctx.get_dest_info(av)) != SUCCESS
+    || (st = gctx.init_socket()) != SUCCESS)
         goto error;
 
     if (signal(SIGALRM, pinger_loop) == SIG_ERR
@@ -122,22 +146,9 @@ int main(int ac, const char* av[])
         goto error;
     }
 
-#ifdef IS_IPV6_SUPORTED
-    spetialize_by_ip_type(is_ipv6);
-#else
-    spetialize_by_ipv4();
-#endif
-
     gctx.prog_id = getpid() & 0XFFFF;
 
-    PRINT_HEADER(gctx.dest_dns);
-
-    gettimeofday(&gctx.start_time, &gctx.tz);
-
-    while (gctx.parse.opts_args.preload-- > 0)
-        gctx.send_ping();
-
-    pinger_loop();
+    start_ping_sender();
 
     static uint8_t packet[MAX_PACKET_SIZE]; // addapt cause how i sent the ip header too
                                     // and have to handle IPV6 addresses too

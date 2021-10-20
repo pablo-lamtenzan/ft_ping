@@ -4,8 +4,6 @@
 # include <ft_error.h>
 
 # include <sys/time.h>
-# include <sys/types.h>
-# include <stdbool.h>
 # include <arpa/inet.h>
 # include <netdb.h>
 # include <bits/local_lim.h>
@@ -21,16 +19,15 @@
 #ifdef AF_INET6
 # define IS_IPV6_SUPORTED
 #endif
-# undef IS_IPV6_SUPORTED
 
-
+typedef error_code_t (*get_dest_info_t)(const char* av[]);
+typedef error_code_t (*init_socket_t)();
 typedef error_code_t (*print_packet_t)(const void* const, ssize_t);
 typedef void (*send_ping_t)();
 
 typedef struct 		gcontext
 {
-    //struct addrinfo*    dest_info;
-	struct sockaddr_in	dest_sockaddr; // TODO: Also for ipv6 (can be sockaddr and cast it with macros)
+	struct sockaddr		dest_sockaddr;
 	const uint8_t		dest_dns[NI_MAXHOST];
 	const uint8_t		dest_ip[HOST_NAME_MAX];
     size_t              packet_datalen;
@@ -41,9 +38,13 @@ typedef struct 		gcontext
 
 	struct
 	{
+		get_dest_info_t	_get_dest_info;
+		init_socket_t	_init_socket;
 		print_packet_t 	_print_packet;
 		send_ping_t		_send_ping;
 	} gfamilydependent;
+	# define get_dest_info gfamilydependent._get_dest_info
+	# define init_socket gfamilydependent._init_socket
 	# define print_packet gfamilydependent._print_packet
 	# define send_ping gfamilydependent._send_ping
 
@@ -58,10 +59,12 @@ typedef struct 		gcontext
 		uint64_t _nb_packets;
 		uint64_t _nb_packets_received;
 		uint64_t _nb_packets_transmited;
+		uint64_t _nb_packets_error;
 	} gpacketcount;
 	# define nb_packets gpacketcount._nb_packets
 	# define nb_packets_received gpacketcount._nb_packets_received
 	# define nb_packets_transmited gpacketcount._nb_packets_transmited
+	# define nb_packets_error gpacketcount._nb_packets_error
 
 	struct
 	{
@@ -85,18 +88,8 @@ extern gcontext_t	gctx;
 # define MAXWAITTIME 10
 # define TV_TO_MS(tv) (double)((double)(tv.tv_sec) * 1000.0 + (double)(tv.tv_usec) / 1000.0)
 
-error_code_t	get_dest_info(const char* av[]
-#ifdef IS_IPV6_SUPORTED
-    				, bool * const is_ipv6
-#endif
-    			);
-
-error_code_t	init_socket(
-#ifdef IS_IPV6_SUPORTED
-    				bool is_ipv6
-#endif
-				);
-
+error_code_t	gest_dest_info4(const char* av[]);
+error_code_t	init_socket4();
 error_code_t	receive_pong(uint8_t* const dest, size_t dest_len, ssize_t* const bytes_recv);
 error_code_t	print_packet4(const void* const packetbuff, ssize_t packet_len);
 void			send_ping4();
@@ -105,6 +98,8 @@ void			terminate();
 
 #ifdef IS_IPV6_SUPORTED
 
+error_code_t	get_dest_info6(const char* av[]);
+error_code_t	init_socket6();
 error_code_t	print_packet6(const void* const packetbuff, ssize_t packet_len);
 void			send_ping6();
 

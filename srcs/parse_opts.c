@@ -6,21 +6,17 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 19:52:07 by pablo             #+#    #+#             */
-/*   Updated: 2021/10/16 21:55:02 by pablo            ###   ########.fr       */
+/*   Updated: 2021/10/20 19:11:11 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include <parse.h>
 # include <ping.h>
+# include <ftlibc.h>
 
-# include <stdbool.h>
 # include <stdint.h>
 # include <stdlib.h>
-# include <stdio.h>
 # include <unistd.h>
-# include <string.h> // TO DO: remove
-
-//*** TO DO IN ANOTHER FILE ***//
 
 __attribute__ ((pure))
 char            ft_tolower(int c)
@@ -67,8 +63,6 @@ error:
     return (false);
 }
 
-//***                       ***//
-
 __attribute__ ((cold))
 static bool     parse_mark_arg(const char* arg)
 {
@@ -79,12 +73,12 @@ static bool     parse_mark_arg(const char* arg)
         format_ptr = MSG_INV_ARG_STR;
         goto error;
     }
-    if (strlen(arg) > MAX_64BITS_CHARS - 1)
+    if (ft_strlen(arg) > MAX_64BITS_CHARS - 1)
     {
         format_ptr = MSG_INV_ARG_LEN;
         goto error;
     }
-    int64_t value = atol(arg);
+    int64_t value = ft_atol(arg);
     if (value > INT32_MAX || value < 0)
     {
         format_ptr = MSG_INV_ARG_RANGE_INT;
@@ -116,12 +110,12 @@ static bool     parse_preload_arg(const char* arg)
         format_ptr = MSG_INV_ARG_STR;
         goto error;
     }
-    if (strlen(arg) > MAX_64BITS_CHARS - 1)
+    if (ft_strlen(arg) > MAX_64BITS_CHARS - 1)
     {
         format_ptr = MSG_INV_ARG_LEN;
         goto error;
     }
-    int64_t value = atol(arg);
+    int64_t value = ft_atol(arg);
     if (value > UINT16_MAX + 1 || value < 1)
     {
         format_ptr = MSG_INV_ARG_RANGE_SHORT;
@@ -162,7 +156,7 @@ static bool     parse_pmtudisc_arg(const char* arg)
 
     for (size_t i = 0 ; i < ARR_SIZE(opts) ; i++)
     {
-        if (strncmp(arg, opts[i], sizes[i]) == 0)
+        if (ft_strncmp(arg, opts[i], sizes[i]) == 0)
         {
             SET_OPT_ARG_PMTUDISK(1 << i);
             break ;
@@ -186,12 +180,12 @@ static bool     parse_deadline_arg(const char* arg)
         format_ptr = MSG_INV_ARG_STR;
         goto error;
     }
-    if (strlen(arg) > MAX_64BITS_CHARS - 1)
+    if (ft_strlen(arg) > MAX_64BITS_CHARS - 1)
     {
         format_ptr = MSG_INV_ARG_LEN;
         goto error;
     }
-    int64_t value = atol(arg);
+    int64_t value = ft_atol(arg);
     if (value > INT32_MAX || value < 0)
     {
         format_ptr = MSG_INV_ARG_RANGE_INT;
@@ -217,7 +211,7 @@ static bool     parse_timeout_arg(const char* arg)
         goto error;
     }
     int64_t value = strtol(arg, NULL, 0);
-    if (strlen(arg) > 7 || value < 0)
+    if (ft_strlen(arg) > 7 || value < 0)
     {
         format_ptr = MSG_INV_ARG_BAD_TIMEOUT;
         goto error;
@@ -281,7 +275,7 @@ static bool     parse_sndbuff_arg(const char* arg)
         format_ptr = MSG_INV_ARG_STR;
         goto error;
     }
-    if (strlen(arg) > MAX_64BITS_CHARS - 1)
+    if (ft_strlen(arg) > MAX_64BITS_CHARS - 1)
     {
         format_ptr = MSG_INV_ARG_LEN;
         goto error;
@@ -311,7 +305,7 @@ static bool     parse_ttl_arg(const char* arg)
         format_ptr = MSG_INV_ARG_STR;
         goto error;
     }
-    if (strlen(arg) > MAX_64BITS_CHARS - 1)
+    if (ft_strlen(arg) > MAX_64BITS_CHARS - 1)
     {
         format_ptr = MSG_INV_ARG_LEN;
         goto error;
@@ -342,7 +336,7 @@ static bool     parse_timestamp_arg(const char* arg)
 
     for (size_t i = 0 ; i < ARR_SIZE(opts) ; i++)
     {
-        if (strncmp(arg, opts[i], sizes[i]) == 0)
+        if (ft_strncmp(arg, opts[i], sizes[i]) == 0)
         {
             SET_OPT_ARG_TIMESTAMP(1 << i);
             break ;
@@ -358,9 +352,9 @@ static bool     parse_timestamp_arg(const char* arg)
 
 static bool     parse_count_arg(const char* arg)
 {
-    if (is_string_digit(arg) == false || strlen(arg) > MAX_64BITS_CHARS - 1)
+    if (is_string_digit(arg) == false || ft_strlen(arg) > MAX_64BITS_CHARS - 1)
         goto error;
-    int64_t value = atol(arg);
+    int64_t value = ft_atol(arg);
     if (value > INT32_MAX || value < 0)
         goto error;
 
@@ -421,7 +415,7 @@ error_code_t    parse_opts(const char** av[])
         for (register size_t opts_idx = 0 ; opts_idx < ARR_SIZE(opts)
         ; opts_idx++)
         {
-            if (strncmp((*av)[av_idx], opts[opts_idx], OPT_SIZE) == 0)
+            if (ft_strncmp((*av)[av_idx], opts[opts_idx], OPT_SIZE) == 0)
             {
                 if (opts_idx < ARR_SIZE(fillers)
                 && (opt_arg_is_present(&av_idx, av) == false

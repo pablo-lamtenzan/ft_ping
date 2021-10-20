@@ -7,12 +7,16 @@
 
 # define GET_DESTADDR (*gctx.dest_dns != 0 ? gctx.dest_dns : gctx.dest_ip)
 
-# define PRINT_TERMINATION_HDR(to, transm, receiv, time) \
-        printf("\n--- %s ping statistics ---\n%lu packets transmitted, %lu received", \
-        to, transm, receiv); \
+# define PRINT_TERMINATION_HDR(to, transm, receiv, error, time) \
+        (error ? \
+            printf("\n--- %s ping statistics ---\n%lu packets transmitted, %lu received, +%lu errors", \
+			to, transm, receiv, error) \
+        : \
+            printf("\n--- %s ping statistics ---\n%lu packets transmitted, %lu received", \
+            to, transm, receiv)); \
         transm ? \
             (transm >= receiv ? \
-                printf(", %.1f%% packet loss, time %lums\n", (double)PERCENTAGE(receiv, transm), (uint64_t)time) \
+                printf(", %hhu%% packet loss, time %lums\n", (uint8_t)PERCENTAGE(receiv, transm), (uint64_t)time) \
             : \
                 printf(" -- somebody's printing up packets!\n")) \
         : 0
@@ -43,7 +47,7 @@ void terminate()
     if (gettimeofday(&tv, &gctx.tz) != 0)
         goto end;
     tvsub(&tv, &gctx.start_time);
-    PRINT_TERMINATION_HDR(GET_DESTADDR, gctx.nb_packets_transmited, gctx.nb_packets_received, TV_TO_MS(tv));
+    PRINT_TERMINATION_HDR(GET_DESTADDR, gctx.nb_packets_transmited, gctx.nb_packets_received, gctx.nb_packets_error, TV_TO_MS(tv));
     if (gctx.nb_packets_received)
         PRINT_TERMINATION_RTT(gctx.tmin, gctx.tmax, gctx.tsum, gctx.nb_packets_received);
 end:

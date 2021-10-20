@@ -1,7 +1,6 @@
 
 # include <ping.h>
 
-# include <netdb.h>
 # include <netinet/in.h>
 # include <errno.h>
 
@@ -14,8 +13,8 @@ error_code_t receive_pong(uint8_t* const dest, size_t dest_len, ssize_t* const b
     error_code_t st = SUCCESS;
 
     struct msghdr mhdr = (struct msghdr){
-        .msg_name = &gctx.dest_sockaddr,
-        .msg_namelen = sizeof(gctx.dest_sockaddr),
+        .msg_name = (struct sockaddr_in*)&gctx.dest_sockaddr,
+        .msg_namelen = sizeof(struct sockaddr_in),
         .msg_iov = (struct iovec[]){{
             .iov_base = dest,
             .iov_len = dest_len

@@ -16,7 +16,7 @@
 # define SET_OPT_ARG_DEADLINE(value) (gctx.parse.opts_args.deadline = (int32_t)(value))
 # define SET_OPT_ARG_TIMEOUT(value) (gctx.parse.opts_args.timeout = (uint16_t)(value))
 # define SET_OPT_ARG_PATTERN(value, neg) \
-								memcpy(gctx.parse.opts_args.pattern + 1, (value), ARR_SIZE(gctx.parse.opts_args.pattern) - 1); \
+								ft_memcpy(gctx.parse.opts_args.pattern + 1, (value), ARR_SIZE(gctx.parse.opts_args.pattern) - 1); \
 								*gctx.parse.opts_args.pattern = neg ? '-' : 0;
 # define USE_OPT_ARG_PATTERN (*gctx.parse.opts_args.pattern == '-' ? \
         gctx.parse.opts_args.pattern : gctx.parse.opts_args.pattern + 1)
