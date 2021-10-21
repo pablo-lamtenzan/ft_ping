@@ -34,6 +34,8 @@ typedef struct			opt_args
 	uint8_t			ttl;
 	timestamp_opt_t	timestamp;
 	uint64_t		count;
+	float			interval;
+	int32_t			packetsize;
 }						opts_args_t;
 
 /// struct type containing the parsing context

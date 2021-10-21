@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 19:52:07 by pablo             #+#    #+#             */
-/*   Updated: 2021/10/20 23:47:20 by pablo            ###   ########.fr       */
+/*   Updated: 2021/10/22 00:02:08 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,24 @@ bool            is_string_digit(const char* s)
         s++;
     }
     return (true);
+}
+
+__attribute__ ((pure))
+bool            is_string_floating_point(const char* s)
+{
+    int point_nb = 0;
+
+    if (*s == '-')
+        s++;
+    while (*s)
+    {
+        if (*s == '.')
+            point_nb++;
+        else if (*s < '0' || *s > '9')
+            return (false);
+        s++;
+    }
+    return (point_nb < 2);
 }
 
 __attribute__ ((pure))
@@ -365,6 +383,63 @@ error:
     return false;
 }
 
+__attribute__ ((cold))
+static bool     parse_packetsize_arg(const char* arg)
+{
+    const char* format_ptr;
+
+    if (is_string_digit(arg) == false)
+    {
+        format_ptr = MSG_INV_ARG_STR;
+        goto error;
+    }
+    if (ft_strlen(arg) > MAX_64BITS_CHARS - 1)
+    {
+        format_ptr = MSG_INV_ARG_LEN;
+        goto error;
+    }
+    int64_t value = ft_atol(arg);
+    if (value > INT32_MAX || value < 0)
+    {
+        format_ptr = MSG_INV_ARG_RANGE_INT;
+        goto error;
+    }
+    SET_OPT_ARG_PACKETSIZE(value);
+    return (true);
+
+error:
+    PRINT_ERROR(format_ptr, arg);
+    return (false);
+}
+
+# include <stdlib.h>
+
+__attribute__ ((cold))
+static bool     parse_interval_arg(const char* arg)
+{
+    const char* format_ptr;
+
+    if (is_string_floating_point(arg) == false)
+    {
+        format_ptr = MSG_GARBAGE;
+        goto error;
+    }
+    uint8_t point_index = 0;
+    for ( ; arg[point_index] && arg[point_index] != '.' ; point_index++);
+    if (point_index > 6)
+    {
+        format_ptr = MSG_INTERVAL_BAD_TIMING;
+        goto error;
+    }
+    float value = ft_atof(arg);
+    SET_OPT_INTERVAL(value < 0 ? 0.0 : value);
+    return (true);
+
+error:
+    PRINT_ERROR(format_ptr, arg);
+    return (false);
+}
+
 static bool    opt_arg_is_present(register size_t* const av_idx, const char** av[])
 {
     if ((*av)[++(*av_idx)] == NULL)
@@ -405,6 +480,8 @@ error_code_t    parse_opts(const char** av[])
         &parse_ttl_arg,
         &parse_timestamp_arg,
         &parse_count_arg,
+        &parse_interval_arg,
+        &parse_packetsize_arg,
     };
 
     size_t av_idx = 0;

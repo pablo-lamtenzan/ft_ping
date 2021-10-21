@@ -14,3 +14,4 @@ long		ft_atol(const char *str);
 int         ft_strcmp(const char* s1, const char* s2);
 int         ft_strncmp(const char* s1, const char* s2, size_t size);
 long        ft_strtol(const char *nptr, char **endptr, register int base);
+double      ft_atof(const char *s);

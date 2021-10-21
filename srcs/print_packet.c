@@ -138,7 +138,8 @@ static double get_time_diff(struct timeval *packet_tv)
     struct timeval now_tv;
 
     gettimeofday(&now_tv, NULL);
-    tvsub(&now_tv, packet_tv);
+    tvsub(&now_tv, gctx.packet_payloadlen < sizeof(struct timeval) || OPT_HAS(OPT_PATTERN)
+    ? &gctx.aux_pktime : packet_tv);
 
     const double t = TV_TO_MS(now_tv);
 
@@ -157,13 +158,14 @@ error_code_t print_packet4(const void *const packetbuff, ssize_t packet_len)
     if (OPT_HAS(OPT_FLOOD))
     {
         gctx.nb_packets_received++;
+        get_time_diff(GET_TV_FROM_PACKET(packetbuff));
         printf("%c", 0X08);
         fflush(stdout);
         goto end;
     }
 
-    const struct iphdr *const ip = (const struct iphdr *const)packetbuff;
-    const struct icmphdr *const icp = (const struct icmphdr *const)(packetbuff + sizeof(*ip));
+    const struct iphdr *const ip = (const struct iphdr *)packetbuff;
+    const struct icmphdr *const icp = (const struct icmphdr *)(packetbuff + sizeof(*ip));
 
     char *src_ip = (char *)gctx.dest_ip;
 

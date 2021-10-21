@@ -30,11 +30,12 @@ typedef struct 		gcontext
 	struct sockaddr		dest_sockaddr;
 	const uint8_t		dest_dns[NI_MAXHOST];
 	const uint8_t		dest_ip[HOST_NAME_MAX];
-    size_t              packet_datalen;
+    size_t              packet_payloadlen;
 	int					sockfd;
 	uint16_t			prog_id;
 	struct timeval		start_time;
 	struct timeval		deadline_time;
+	struct timeval		aux_pktime;
 
 	struct
 	{
@@ -82,11 +83,13 @@ extern gcontext_t	gctx;
 # define ARR_SIZE(array) (sizeof(array) / sizeof(*array))
 # define IS_ROOT (getuid() == 0)
 # define MAX_PACKET_SIZE 4096
+# define MAX_PACKET_SIZE_BITS (MAX_PACKET_SIZE * 8)
 # define PSEUDOINFINTY 99999999999
 # define PERCENTAGE(x, max) ((((double)(max) - (double)(x)) * 100.0) / (double)(max))
-# define DEFAULT_DATALEN 56
+# define DEFAULT_PAYLOADLEN 56
 # define MAXWAITTIME 10
 # define TV_TO_MS(tv) (double)((double)(tv.tv_sec) * 1000.0 + (double)(tv.tv_usec) / 1000.0)
+# define DEFAULT_INTERVAL 1
 
 error_code_t	gest_dest_info4(const char* av[]);
 error_code_t	init_socket4();

@@ -41,7 +41,7 @@ void send_ping4()
 		.version = 4,
 		.ihl = 5,
 		.tos = OPT_HAS(OPT_TOS) ? gctx.parse.opts_args.tos : 0,
-		.tot_len = gctx.packet_datalen + sizeof(*ip) + sizeof(*icp),
+		.tot_len = gctx.packet_payloadlen + sizeof(*ip) + sizeof(*icp),
 		.id = 0,
 		.frag_off = 0,
 		.ttl = OPT_HAS(OPT_TTL) ? gctx.parse.opts_args.ttl : 0X40,
@@ -57,18 +57,31 @@ void send_ping4()
 		.un.echo.id = gctx.prog_id,
 		.un.echo.sequence = gctx.nb_packets_transmited,
 	};
-
-	if (gettimeofday(tp, NULL) != 0)
+	if (gctx.packet_payloadlen < sizeof(*tp)
+	|| OPT_HAS(OPT_PATTERN))
+	{
+		if (gettimeofday(&gctx.aux_pktime, NULL) != 0)
+		{
+			PRINT_ERROR(INVALID_SYSCALL, "gettimeofday");
+			exit(ERR_SYSCALL);
+		}
+	}
+	else if (gettimeofday(tp, NULL) != 0)
 	{
 		PRINT_ERROR(INVALID_SYSCALL, "gettimeofday");
 		exit(ERR_SYSCALL);
 	}
 
-	memset(packet + sizeof(*ip) + sizeof(*icp) + sizeof(*tp), 0XFF, gctx.packet_datalen);
+	if (OPT_HAS(OPT_PATTERN))
+		ft_memcpy(packet + sizeof(*ip) + sizeof(*icp),
+		*gctx.parse.opts_args.pattern ? gctx.parse.opts_args.pattern : gctx.parse.opts_args.pattern + 1,
+		*gctx.parse.opts_args.pattern ? ARR_SIZE(gctx.parse.opts_args.pattern) : ARR_SIZE(gctx.parse.opts_args.pattern) - 1);
 
-	const ssize_t total_packet_size = TOTALPACKET_SIZE4(gctx.packet_datalen);
+	memset(packet + sizeof(*ip) + sizeof(*icp) + sizeof(*tp), 0XFF, gctx.packet_payloadlen);
 
-	icp->checksum = in_cksum((uint16_t *)(packet + sizeof(*ip)), gctx.packet_datalen + sizeof(*icp));
+	const ssize_t total_packet_size = TOTALPACKET_SIZE4(gctx.packet_payloadlen);
+
+	icp->checksum = in_cksum((uint16_t *)(packet + sizeof(*ip)), gctx.packet_payloadlen + sizeof(*icp));
 
 	const ssize_t bytes_sent = sendto(
 		gctx.sockfd,
@@ -123,17 +136,18 @@ void send_ping6()
 		.icmp6_cksum = 0,
 		.icmp6_dataun.icmp6_un_data16 = {gctx.prog_id, gctx.nb_packets_transmited}};
 
+
 	if (gettimeofday(tp, NULL) != 0)
 	{
 		PRINT_ERROR(INVALID_SYSCALL, "gettimeofday");
 		exit(ERR_SYSCALL);
 	}
 
-	memset(packet + sizeof(*ip) + sizeof(*icp) + sizeof(*tp), 0XFF, gctx.packet_datalen);
+	memset(packet + sizeof(*ip) + sizeof(*icp) + sizeof(*tp), 0XFF, gctx.packet_payloadlen);
 
-	const ssize_t total_packet_size = TOTALPACKET_SIZE6(gctx.packet_datalen);
+	const ssize_t total_packet_size = TOTALPACKET_SIZE6(gctx.packet_payloadlen);
 
-	icp->icmp6_cksum = in_cksum((uint16_t *)(packet + sizeof(*ip)), gctx.packet_datalen + sizeof(*icp));
+	icp->icmp6_cksum = in_cksum((uint16_t *)(packet + sizeof(*ip)), gctx.packet_payloadlen + sizeof(*icp));
 
 	const ssize_t bytes_sent = sendto(
 		gctx.sockfd,

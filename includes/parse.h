@@ -27,6 +27,8 @@
 # define SET_OPT_ARG_TTL(value) (gctx.parse.opts_args.ttl = (uint8_t)(value))
 # define SET_OPT_ARG_TIMESTAMP(opt) (gctx.parse.opts_args.timestamp = (opt))
 # define SET_OPT_ARG_COUNT(arg) (gctx.parse.opts_args.count = (arg))
+# define SET_OPT_INTERVAL(arg) (gctx.parse.opts_args.interval = (arg))
+# define SET_OPT_ARG_PACKETSIZE(arg) (gctx.parse.opts_args.packetsize = (arg))
 
 typedef bool (*const fill_opt_args_t)(const char*);
 

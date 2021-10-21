@@ -3,11 +3,13 @@
 
 ///TODO: Search why the makefile relink
 ///TODO: Hanlde ipv6 globaly
-///TODO: mdev on stats
 ///TODO: bonus flags (test & compare with true ping)
-///TODO: implement (parse & use) option -s & (and maybe fragmentation too) 
-///TODO: implement (parse & use) option -i
-///TODO: update -h when i finished to implement options
+///TODO: implement fragmentation
+///TODO: need to find a way to test verbose
+
+///TODO: fragmentaion + packet size > MTU causes errors on true ping (logical)
+///NOTE: USEFUL FOR IPV6 & fragmentation: https://labs.apnic.net/?p=1057
+/// kernel handles fragmentation ?
 
 #include <sys/socket.h>
 #include <signal.h>
@@ -34,7 +36,7 @@
 ///TODO: Size changes if ipv6 !!!
 #define PRINT_HEADER(hostaddr) (printf("PING %s (%s): %lu(%lu) bytes of data.\n", \
                                        *hostaddr ? hostaddr : gctx.dest_ip,       \
-                                       gctx.dest_ip, gctx.packet_datalen, gctx.packet_datalen + sizeof(struct iphdr) + sizeof(struct icmphdr)))
+                                       gctx.dest_ip, gctx.packet_payloadlen, gctx.packet_payloadlen + sizeof(struct iphdr) + sizeof(struct icmphdr)))
 
 __attribute__((always_inline)) static inline error_code_t check_initial_validity(int ac)
 {
@@ -71,10 +73,28 @@ __attribute__((always_inline)) static inline error_code_t start_ping_sender()
         goto end;
     }
 
+    if (OPT_HAS(OPT_PACKET_SZ))
+    {
+        if (
+#ifdef IS_IPV6_SUPORTED
+        (OPT_HAS(OPT_IPV6_ONLY) &&
+        gctx.packet_payloadlen > MAX_PACKET_SIZE -
+        (sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr)))
+        ||
+#endif
+        ((OPT_HAS(OPT_IPV6_ONLY) == 0) &&
+        gctx.packet_payloadlen > MAX_PACKET_SIZE -
+        (sizeof(struct iphdr) + sizeof(struct icmphdr)))
+        )
+        {
+            PRINT_ERROR("%s", __progname ": error: packet payload size does not fit\n");
+            st = ERR_INV_OPT;
+            goto end;
+        }
+    }
+
     while (gctx.parse.opts_args.preload-- > 0)
         gctx.send_ping();
-
-    pinger_loop();
 
     if (gettimeofday(&gctx.start_time, NULL) != 0)
     {
@@ -82,13 +102,15 @@ __attribute__((always_inline)) static inline error_code_t start_ping_sender()
         st = ERR_SYSCALL;
     }
 
+    pinger_loop();
+
 end:
     return st;
 }
 
 gcontext_t gctx = (gcontext_t){
     .tmin = PSEUDOINFINTY,
-    .packet_datalen = DEFAULT_DATALEN,
+    .parse.opts_args.interval = DEFAULT_INTERVAL
 };
 
 __attribute__((always_inline)) static inline void spetialize_by_ipv4()
@@ -125,6 +147,13 @@ int main(int ac, const char *av[])
         goto error;
 
     gctx.nb_packets = gctx.parse.opts_args.count;
+    gctx.packet_payloadlen = OPT_HAS(OPT_PACKET_SZ) ? gctx.parse.opts_args.packetsize : DEFAULT_PAYLOADLEN;
+
+    if (OPT_HAS(OPT_INTERVAL) && gctx.parse.opts_args.interval < 1.0)
+    {
+        printf(__progname ": note: for interval < 1 flood opt is autoset\n");
+        OPT_ADD(OPT_FLOOD);
+    }
 
 #ifdef DEBUG
     print_opts();

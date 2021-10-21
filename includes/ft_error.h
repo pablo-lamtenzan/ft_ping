@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 19:55:21 by pablo             #+#    #+#             */
-/*   Updated: 2021/10/20 17:54:40 by pablo            ###   ########.fr       */
+/*   Updated: 2021/10/21 23:52:52 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,24 +32,28 @@ typedef enum	error_code
 # define USAGE_BRIEF __progname " [options] <destination>"
 # define USAGE_OPTIONS "Options:\n\
 \t<destination>      dns name or ip address\n\
-\t-f                 flood ping\n\
+\t-f                 flood ping (print a \'.\' for each request and a backspace for each reply)\n\
 \t-h                 print help and exit\n\
-\t-I <interface>     either interface name or address\n\
+\t-I <interface>     either interface name or address (not supported)\n\
 \t-l <preload>       send <preload> number of packages while waiting replies\n\
-\t-m <mark>          tag the packets going out\n\
-\t-M <pmtud opt>     define mtu discovery, can be one of <do|dont|want>\n\
-\t-n                 no dns name resolution\n\
-\t-p <pattern>       contents of padding byte\n\
+\t-m <mark>          tag the packets going out (not suported)\n\
+\t-M <pmtud opt>     define mtu discovery, can be one of <do|dont|want> (not suported)\n\
+\t-n                 no dns name resolution (not supported)\n\
+\t-p <pattern>       pad 16 bytes of <pattern> data at the begin of packet's payload\n\
 \t-Q <tclass>        use quality of service <tclass> bits\n\
 \t-S <size>          use <size> as SO_SNDBUF socket option value\n\
 \t-t <ttl>           define time to live\n\
-\t-T <timestamp>     TO DO !!!\n\
-\t-W <timeout>       time to wait for response\n\n\
+\t-T <timestamp>     not supported\n\
+\t-W <timeout>       time to wait for response\n\
+\t-w <deadline>      after sending packets for <deadline> seconds the program ends\n\
+\t-c <count>         after sending <count> the program ends. If count is 0 send packets until interrupt\n\
+\t-i <interval>      send a ECHO_REQUEST each <interval> seconds\n\
+\t-s <packetsize>    specifies the size of the packet's payload in bytes\n\n\
 IPv4 options:\n\
 \t-4                 use IPv4\n\n\
 IPv6 options:\n\
 \t-6                 use IPv6\n\
-\t-c                 stop after count ECHO_RESPONSE. If count is 0 send packets until interrupt\n"
+\t-c                 stop after count ECHO_RESPONSE. \n"
 
 # define USAGE_HELP USAGE_BRIEF "\n\n" USAGE_OPTIONS
 
@@ -78,4 +82,6 @@ IPv6 options:\n\
 # define INVALID_SYSCALL __progname ": syscall %s failed for some unknown reason\n"
 # define MSG_INV_ARG_COUNT __progname ": invalid count of packets to transmit: `%s\'" "\n"
 # define MSG_INVALID_FAMILY __progname ": error: invalid family ( hint: %s )" "\n"
-# define MSG_MUST_BE_ROOT __progname ": error: user msut be root" "\n"
+# define MSG_MUST_BE_ROOT __progname ": error: user must be root" "\n"
+# define MSG_GARBAGE __progname ": option argument contains garbage: %s" "\n"
+# define MSG_INTERVAL_BAD_TIMING __progname ": bad timing interval: %s" "\n"
