@@ -90,6 +90,7 @@ extern gcontext_t	gctx;
 # define MAXWAITTIME 10
 # define TV_TO_MS(tv) (double)((double)(tv.tv_sec) * 1000.0 + (double)(tv.tv_usec) / 1000.0)
 # define DEFAULT_INTERVAL 1
+# define PAYLOAD_BYTE ((uint8_t)(4 | ((2 << 4) & 0XF0)))
 
 error_code_t	gest_dest_info4(const char* av[]);
 error_code_t	init_socket4();

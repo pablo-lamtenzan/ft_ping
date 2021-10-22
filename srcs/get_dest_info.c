@@ -23,7 +23,6 @@ error_code_t gest_dest_info4(const char* av[])
         goto error;
     }
 
-    /// TODO: LIBC ...
     ft_memcpy((uint8_t*)gctx.dest_dns, dest->ai_canonname, ft_strlen(dest->ai_canonname));
 
 	if (dest->ai_family != AF_INET)
@@ -73,7 +72,8 @@ error_code_t get_dest_info6(const char* av[])
         goto error;
     }
 
-	/// TODO: LIBC ...
+    printf("next: %p\n", dest->ai_next);
+
     ft_memcpy((uint8_t*)gctx.dest_dns, dest->ai_canonname, ft_strlen(dest->ai_canonname));
 
 	if (dest->ai_family != AF_INET6)

@@ -11,6 +11,12 @@
 ///NOTE: USEFUL FOR IPV6 & fragmentation: https://labs.apnic.net/?p=1057
 /// kernel handles fragmentation ?
 
+///TODO: Ipv6 on amazon.com getaddrinfo fails
+///TODO: Ipv6 on google.com sendto fails
+///TODO: On ipv6 the checksum is calculated diferently than ipv4
+
+///NOTE: Valid ip address that is not used 192.168.1.9
+
 #include <sys/socket.h>
 #include <signal.h>
 #include <netinet/in.h>

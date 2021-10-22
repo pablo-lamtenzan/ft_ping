@@ -23,7 +23,7 @@
 
 #define GET_TV_FROM_PACKET(packetptr) (struct timeval *)(packetptr + sizeof(struct iphdr) + sizeof(struct icmphdr))
 
-__attribute__((always_inline)) static inline void handle_other_replies(struct icmphdr *const icp, const char *const address)
+__attribute__((always_inline)) static inline void handle_other_replies(struct icmphdr *icp, const char *const address)
 {
     char *type = "";
     char *code = type;
@@ -130,6 +130,7 @@ __attribute__((always_inline)) static inline void handle_other_replies(struct ic
 
     gctx.nb_packets_error++;
 
+    icp = (struct icmphdr*)((char*)icp + (48 - sizeof(struct iphdr)));
     PRINT_ICMP_ERROR(address, address, icp->un.echo.sequence, OPT_HAS(OPT_VERBOSE), type, code);
 }
 
