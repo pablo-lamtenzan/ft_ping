@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/31 19:55:21 by pablo             #+#    #+#             */
-/*   Updated: 2021/10/21 23:52:52 by pablo            ###   ########.fr       */
+/*   Updated: 2021/11/04 13:55:26 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ IPv6 options:\n\
 # define USAGE_NO_ARG USAGE_ERR "\n\n" USAGE_HELP
 
 # define USAGE_INV_OPT_ERR __progname ": invalid option -- \'%s\'"
-# define USAGE_INV_OPT USAGE_INV_OPT_ERR USAGE_HELP
+# define USAGE_INV_OPT USAGE_INV_OPT_ERR "\n" USAGE_HELP
 
 # define MSG_REQUIRED_DESTINATION __progname ": usage error: Destination address required" "\n"
 # define MSG_UNKNOWN_DESTINATION __progname ": %s: Name or service not known" "\n"

@@ -149,6 +149,14 @@ int main(int ac, const char *av[])
     if ((st = check_initial_validity(ac)) != SUCCESS || (st = parse_opts(&av)) != SUCCESS)
         goto error;
 
+    ///IPv6 is not supported for the moment
+    if (OPT_HAS(OPT_IPV6_ONLY))
+    {
+        PRINT_ERROR("%s\n", __progname ": IPv6 is not supported");
+        st = ERR_INV_OPT;
+        goto error;
+    }
+
     gctx.nb_packets = gctx.parse.opts_args.count;
     gctx.packet_payloadlen = OPT_HAS(OPT_PACKET_SZ) ? gctx.parse.opts_args.packetsize : DEFAULT_PAYLOADLEN;
 
