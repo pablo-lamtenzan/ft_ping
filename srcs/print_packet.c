@@ -130,6 +130,7 @@ __attribute__((always_inline)) static inline void handle_other_replies(struct ic
 
     gctx.nb_packets_error++;
 
+    ///TODO: Is old icmp header (that was sent) located at ip->ihl * 4 + sizeof(icmp) + old_ip->ihl * 4
     icp = (struct icmphdr*)((char*)icp + (48 - sizeof(struct iphdr)));
     PRINT_ICMP_ERROR(address, address, icp->un.echo.sequence, OPT_HAS(OPT_VERBOSE), type, code);
 }

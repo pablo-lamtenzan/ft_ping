@@ -112,3 +112,6 @@ void			send_ping6();
 /// Legacy utils
 void			tvsub(struct timeval* out, struct timeval* in);
 unsigned short	in_cksum(unsigned short *addr, int len);
+
+# include <netinet/ip6.h>
+uint32_t		ipv6_pseudo_header_checksum(const struct ip6_hdr* ip6, uint32_t len, uint8_t protocol);

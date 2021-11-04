@@ -57,7 +57,7 @@ void send_ping4()
 		.code = 0,
 		.checksum = 0,
 		.un.echo.id = gctx.prog_id,
-		.un.echo.sequence = gctx.nb_packets_transmited,
+		.un.echo.sequence = gctx.nb_packets_transmited + 1,
 	};
 
 	if (gctx.packet_payloadlen < sizeof(*tp)
@@ -80,7 +80,7 @@ void send_ping4()
 		*gctx.parse.opts_args.pattern ? gctx.parse.opts_args.pattern : gctx.parse.opts_args.pattern + 1,
 		*gctx.parse.opts_args.pattern ? ARR_SIZE(gctx.parse.opts_args.pattern) : ARR_SIZE(gctx.parse.opts_args.pattern) - 1);
 
-	memset(packet + sizeof(*ip) + sizeof(*icp) + sizeof(*tp), PAYLOAD_BYTE, gctx.packet_payloadlen);
+	ft_memset(packet + sizeof(*ip) + sizeof(*icp) + sizeof(*tp), PAYLOAD_BYTE, gctx.packet_payloadlen);
 
 	const ssize_t total_packet_size = TOTALPACKET_SIZE4(gctx.packet_payloadlen);
 
@@ -133,11 +133,11 @@ void send_ping6()
 		.ip6_nxt = IPPROTO_ICMPV6,
 		.ip6_hops = OPT_HAS(OPT_TTL) ? gctx.parse.opts_args.ttl : 64,
 		.ip6_src = IN6ADDR_ANY_INIT,
-		.ip6_dst = (*((struct sockaddr_in6*)&gctx.dest_sockaddr)).sin6_addr
+		.ip6_dst = (*(struct sockaddr_in6*)&gctx.dest_sockaddr).sin6_addr
 	};
 
 	*icp = (struct icmp6_hdr){
-		.icmp6_type = ICMP6_ECHO_REQUEST,
+		.icmp6_type = 0,
 		.icmp6_code = 0,
 		.icmp6_cksum = 0,
 		.icmp6_dataun.icmp6_un_data16 = {gctx.prog_id, gctx.nb_packets_transmited}
@@ -163,24 +163,24 @@ void send_ping6()
 		*gctx.parse.opts_args.pattern ? gctx.parse.opts_args.pattern : gctx.parse.opts_args.pattern + 1,
 		*gctx.parse.opts_args.pattern ? ARR_SIZE(gctx.parse.opts_args.pattern) : ARR_SIZE(gctx.parse.opts_args.pattern) - 1);
 
-	memset(packet + sizeof(*ip) + sizeof(*icp) + sizeof(*tp), PAYLOAD_BYTE, gctx.packet_payloadlen);
+	ft_memset(packet + sizeof(*ip) + sizeof(*icp) + sizeof(*tp), PAYLOAD_BYTE, gctx.packet_payloadlen);
 
 	const ssize_t total_packet_size = TOTALPACKET_SIZE6(gctx.packet_payloadlen);
 
 	///TODO: Checksum is calculated differently on ipv6
-	icp->icmp6_cksum = in_cksum((uint16_t *)(packet + sizeof(*ip)), gctx.packet_payloadlen + sizeof(*icp));
+	//icp->icmp6_cksum = in_cksum((uint16_t *)(packet + sizeof(*ip)), gctx.packet_payloadlen + sizeof(*icp));
+	//icp->icmp6_cksum = ipv6_pseudo_header_checksum(ip, gctx.packet_payloadlen + sizeof(*icp), IPPROTO_ICMPV6);
 
 	const ssize_t bytes_sent = sendto(
 		gctx.sockfd,
 		(const void *)packet,
 		(const size_t)total_packet_size,
 		0,
-		(const struct sockaddr *)&gctx.dest_sockaddr,
-		sizeof(const struct sockaddr));
+		(const struct sockaddr*)&gctx.dest_sockaddr,
+		sizeof(struct sockaddr));
 
 	if (bytes_sent < 0)
 	{
-		printf("%s\n", strerror(errno));
 		PRINT_ERROR(INVALID_SYSCALL, "sendto");
 		exit(ERR_SYSCALL);
 	}

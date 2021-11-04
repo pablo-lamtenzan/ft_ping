@@ -2,18 +2,12 @@
 #include <ping.h>
 
 ///TODO: Search why the makefile relink
-///TODO: Hanlde ipv6 globaly
+
+///TODO: Hanlde ipv6 globaly (i ve cloned an "ipv6 is suported" ping and sendto still fail)
+// maybe is just my pc ... ?
+
 ///TODO: bonus flags (test & compare with true ping)
-///TODO: implement fragmentation
 ///TODO: need to find a way to test verbose
-
-///TODO: fragmentaion + packet size > MTU causes errors on true ping (logical)
-///NOTE: USEFUL FOR IPV6 & fragmentation: https://labs.apnic.net/?p=1057
-/// kernel handles fragmentation ?
-
-///TODO: Ipv6 on amazon.com getaddrinfo fails
-///TODO: Ipv6 on google.com sendto fails
-///TODO: On ipv6 the checksum is calculated diferently than ipv4
 
 ///NOTE: Valid ip address that is not used 192.168.1.9
 
@@ -29,7 +23,7 @@
 #include <netinet/ip6.h>
 #include <netinet/icmp6.h>
 
-#define GET_SIZE_V6(mgs_size) (sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr) + (msg_size))
+#define GET_SIZE_V6(msg_size) (sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr) + (msg_size))
 
 #endif
 
@@ -37,14 +31,16 @@
 
 #define PRINT_HELP (printf("%s", USAGE_HELP))
 
-#define GET_SIZE_V4(mgs_size) (sizeof(struct iphdr) + sizeof(struct icmphdr) + (msg_size))
+#define GET_SIZE_V4(msg_size) ( sizeof(struct iphdr) + sizeof(struct icmphdr) + (msg_size) )
 
-///TODO: Size changes if ipv6 !!!
-#define PRINT_HEADER(hostaddr) (printf("PING %s (%s): %lu(%lu) bytes of data.\n", \
-                                       *hostaddr ? hostaddr : gctx.dest_ip,       \
-                                       gctx.dest_ip, gctx.packet_payloadlen, gctx.packet_payloadlen + sizeof(struct iphdr) + sizeof(struct icmphdr)))
+#define PRINT_HEADER(hostaddr) (printf("PING %s (%s): %lu(%lu) bytes of data.\n",                                   \
+                                       *hostaddr ? hostaddr : gctx.dest_ip,                                         \
+                                       gctx.dest_ip, gctx.packet_payloadlen, OPT_HAS(OPT_IPV6_ONLY) ?               \
+                                       GET_SIZE_V6(gctx.packet_payloadlen) : GET_SIZE_V4(gctx.packet_payloadlen))   \
+        )
 
-__attribute__((always_inline)) static inline error_code_t check_initial_validity(int ac)
+__attribute__((always_inline))
+static inline error_code_t check_initial_validity(int ac)
 {
     error_code_t st = SUCCESS;
 
@@ -65,7 +61,8 @@ error:
     return st;
 }
 
-__attribute__((always_inline)) static inline error_code_t start_ping_sender()
+__attribute__((always_inline))
+static inline error_code_t start_ping_sender()
 {
     error_code_t st = SUCCESS;
 

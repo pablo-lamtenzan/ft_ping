@@ -3,6 +3,8 @@
 # include <ftlibc.h>
 
 # include <sys/socket.h>
+# include <sys/errno.h>
+# include <string.h>
 
 error_code_t gest_dest_info4(const char* av[])
 {
@@ -68,13 +70,12 @@ error_code_t get_dest_info6(const char* av[])
 	if (getaddrinfo(*av, 0, &hints, &dest) != 0)
     {
         st = ERR_DEST_REQ;
-        PRINT_ERROR(MSG_UNKNOWN_DESTINATION, *av);
+        PRINT_ERROR("[IPv6] " MSG_UNKNOWN_DESTINATION, *av);
         goto error;
     }
 
-    printf("next: %p\n", dest->ai_next);
-
-    ft_memcpy((uint8_t*)gctx.dest_dns, dest->ai_canonname, ft_strlen(dest->ai_canonname));
+	if (dest->ai_canonname)
+		ft_memcpy((uint8_t*)gctx.dest_dns, dest->ai_canonname, ft_strlen(dest->ai_canonname));
 
 	if (dest->ai_family != AF_INET6)
     {
@@ -86,7 +87,7 @@ error_code_t get_dest_info6(const char* av[])
 	const struct in6_addr* const sin6_addr = &((struct sockaddr_in6*)dest->ai_addr)->sin6_addr;
 
 	*(struct sockaddr_in6*)&gctx.dest_sockaddr = (struct sockaddr_in6){
-		.sin6_addr.__in6_u = sin6_addr->__in6_u,
+		.sin6_addr = *sin6_addr,
 		.sin6_family = AF_INET6
 	};
 
@@ -96,6 +97,7 @@ error_code_t get_dest_info6(const char* av[])
 		st = ERR_SYSCALL;
         PRINT_ERROR(INVALID_SYSCALL, "inet_ntop");
 	}
+
 error:
     freeaddrinfo(dest);
     return st;
